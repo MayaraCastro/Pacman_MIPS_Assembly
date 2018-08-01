@@ -32,32 +32,47 @@ pacman_dir: .space  444 # 111*4
 .globl main
 
 main:
+	sw 	$zero, pontuacao #pontuacao do jogo inicial
+	lw 	$t0, bitmap_addr
+	j	 fase1
 	
-	sw $zero, pontuacao #pontuacao do jogo inicial
-	lw $t0, bitmap_addr
-	jal escreve_titulo
-	jal pinta_borda
-	jal cria_personagens
-	jal pinta_personagens
-	jal pinta_obstaculos
-	jal pinta_pontos_mapa1
-	jal mostra_placar
+	#############################
+	#	FASE 1	#
+	#############################
+fase1:
+	jal 	escreve_titulo
+	jal 	pinta_borda
+	jal 	cria_personagens
+	jal 	pinta_personagens
+	jal 	pinta_obstaculos
+	jal 	pinta_pontos_mapa1
+	jal 	mostra_placar
+fase1_loop:
+	jal 	obter_teclado
+	jal 	direita_prox
+	sleep(16)
+	#jal 	mostra_placar
+	jal 	verificar_ganho_fase1
+	j	fase1_loop
 	
-	j main_1
-	j exit
-	
-main_1:
-	jal obter_teclado
-	#li $v0, 1
-	jal direita_prox
-	sleep(30)
-	lw $s7, pontuacao
-	addi $s7, $s7, 1
-	sw $s7, pontuacao
-	jal mostra_placar
-#	jal limpa_personagens
-#	jal pinta_personagens
-	j main_1
+	#############################
+	#	FASE 2	#
+	#############################
+fase2:
+
+fase2_loop:
+
+	####################################################################3
+	#	VERIFICA SE TODOS OS PONTOS DO MAPA FORAM COMIDOS
+	####################################################################
+verificar_ganho_fase1:
+	lw	$s7, pontuacao
+	beq	$s7, 100, venceu #trocar pra fase2
+	jr	$ra
+verificar_ganho_fase2:
+	lw	$s7, pontuacao
+	beq	$s7, 100, venceu
+	jr	$ra
 	
 	#########################################################
 	#	MOSTRA PLACAR DE PONTUACAO DO JOGO	#
@@ -542,6 +557,41 @@ verifica_exit:
 	jr	$ra
 	
 
+	#######################################################################
+	#	VERIFICA SE COME PONTO	
+	#	t9 -> se zero = não comeu ponto, 
+	#	caso contrario ele contem o valor do endereço do pixel
+	#	 mais alto ou mais a esquerda do ponto
+	#######################################################################
+come_ponto_topo:
+	move 	$t9, $zero
+#t3 - > pixel mais a esquerda
+#t6 - > pixel mais a direita
+come_ponto_topo_loop:
+	bgt	$t3, $t6, come_ponto_exit #verifica se já é o ultimo endereco
+	lw	$t4, ($t3) 
+	lw	$t1, cor_ponto
+	beq	$t4, $t1, comeu
+	addi	$t3, $t3, 4 #incrementa t3
+	j	come_ponto_topo_loop
+come_ponto_lateral:
+	move	$t9, $zero
+#t3 - > pixel mais alto
+#t6 - > pixel mais baixo
+come_ponto_lateral_loop:
+##MODIFICAR
+
+	bgt	$t3, $t6, come_ponto_exit #verifica se já é o ultimo endereco
+	lw 	$t4, ($t3) 
+	lw	$t1, cor_ponto
+	beq	$t4, $t1, comeu
+	addi 	$t3, $t3, 1024 #incrementa t3
+	j 	come_ponto_lateral_loop
+	
+comeu:
+	move $t9, $t3
+come_ponto_exit:
+	jr	$ra
 	###########################################################
 	#	MOVIMENTA		                #
 	#	a2: o endereco do vetor a ser movimentado   #
@@ -550,8 +600,39 @@ verifica_exit:
 move_direita:
 	move	$t5, $zero
 	move 	$a3, $ra
-	jal 	limpa_personagens
 	
+	
+	addi	$t3, $t3, -13312
+	jal	come_ponto_lateral
+	beqz	$t9, n_come_ponto_direita
+come_ponto_direita: #apaga o ponto que comeu do mapa e incrementa a pontuacao
+	
+	lw	$s7, pontuacao #Incrementa a pontuacao
+	addi	$s7, $s7, 1
+	sw	$s7, pontuacao
+	
+		
+	lw	$t0, bitmap_addr
+	sub 	$t9, $t9, $t0 #sub pra nao add 2 vezes pois chama o pinta_labrinto que soma com t0
+	addi	$t3, $t9, 0
+	move	$t6, $t3
+	addi	$t6, $t6, 8
+	move	$t5, $t6
+	addi	$t5, $t5, 2048 # 2*1024
+	
+	lw	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	move	$s6, $a1
+	move	$s7, $a2
+	move	$s5, $t7
+	jal 	mostra_placar
+	move	$a1,$s6
+	move	$a2,$s7
+	move	$t7,$s5
+n_come_ponto_direita:
+	jal 	limpa_personagens
+	move	$t5, $zero
 direita_loop:
 	add 	$t2, $t5, $a2
 	lw	$t4, ($t2)
@@ -564,6 +645,36 @@ direita_loop:
 	#bgt	$t4, 0x10010000, acima_loop_ext
 move_esquerda:
 	move 	$a3, $ra
+	
+	addi	$t3, $t3, -13312
+	jal	come_ponto_lateral
+	beqz	$t9, n_come_ponto_esquerda
+come_ponto_esquerda: #apaga o ponto que comeu do mapa e incrementa a pontuacao
+	lw	$s7, pontuacao #Incrementa a pontuacao
+	addi	$s7, $s7, 1
+	sw	$s7, pontuacao
+
+	
+	lw	$t0, bitmap_addr
+	sub 	$t9, $t9, $t0 #sub pra nao add 2 vezes pois chama o pinta_labrinto que soma com t0
+	addi	$t3, $t9, -8
+	move	$t6, $t3
+	addi	$t6, $t6, 8
+	move	$t5, $t6
+	addi	$t5, $t5, 2048 # 2*1024
+	
+	lw	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	move	$s6, $a1
+	move	$s7, $a2
+	move	$s5, $t7
+	jal 	mostra_placar
+	move	$a1,$s6
+	move	$a2,$s7
+	move	$t7,$s5
+n_come_ponto_esquerda:
+
 	jal limpa_personagens
 	move	$t5, $zero
 esquerda_loop:
@@ -579,6 +690,35 @@ esquerda_loop:
 
 move_cima:
 	move 	$a3, $ra
+	addi	$t3, $t3, -52
+	jal	come_ponto_topo
+	beqz	$t9, n_come_ponto_cima
+come_ponto_cima: #apaga o ponto que comeu do mapa e incrementa a pontuacao
+	lw	$s7, pontuacao #Incrementa a pontuacao
+	addi	$s7, $s7, 1
+	sw	$s7, pontuacao
+
+	
+	lw	$t0, bitmap_addr
+	sub 	$t9, $t9, $t0 #sub pra nao add 2 vezes pois chama o pinta_labrinto que soma com t0
+	addi	$t3, $t9, -2048
+	move	$t6, $t3
+	addi	$t6, $t6, 8
+	move	$t5, $t6
+	addi	$t5, $t5, 2048 # 2*1024
+	
+	lw	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	move	$s6, $a1
+	move	$s7, $a2
+	move	$s5, $t7
+	jal 	mostra_placar
+	move	$a1,$s6
+	move	$a2,$s7
+	move	$t7,$s5
+	
+n_come_ponto_cima:
 	jal 	limpa_personagens
 	move	$t5, $zero
 acima_loop:
@@ -594,6 +734,37 @@ acima_loop:
 	
 move_baixo:
 	move	 $a3, $ra
+	
+	addi	$t3, $t3, -52 
+	jal	come_ponto_topo
+	beqz	$t9, n_come_ponto_baixo
+come_ponto_baixo: #apaga o ponto que comeu do mapa e incrementa a pontuacao
+	lw	$s7, pontuacao #Incrementa a pontuacao
+	addi	$s7, $s7, 1
+	sw	$s7, pontuacao
+
+	
+	lw	$t0, bitmap_addr
+	sub 	$t9, $t9, $t0 #sub pra nao add 2 vezes pois chama o pinta_labrinto que soma com t0
+	addi	$t3, $t9, 0
+	move	$t6, $t3
+	addi	$t6, $t6, 8
+	move	$t5, $t6
+	addi	$t5, $t5, 2048 # 2*1024
+	
+	lw	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	move	$s6, $a1
+	move	$s7, $a2
+	move	$s5, $t7
+	jal 	mostra_placar
+	move	$a1,$s6
+	move	$a2,$s7
+	move	$t7,$s5
+	
+n_come_ponto_baixo:
+
 	jal	 limpa_personagens
 	move	$t5, $zero
 baixo_loop:
@@ -608,6 +779,7 @@ baixo_loop:
 	#bgt	$t4, 0x10010000, acima_loop_ext
 move_exit:
 	jal pinta_personagens
+
 	jr $a3
 	
 	########################################################
@@ -819,7 +991,7 @@ cria_personagens:
 	#mapa1
 personagens_mapa1:
 	move $t7, $ra
-#pacman #abaixar o pacman 5 linhas
+#pacman 
 	la $t8, pacman_dir
 	li $t2, 0
 	
@@ -891,9 +1063,9 @@ personagens_mapa1:
 	jal addr_retangulo
 	
 
-#fantasma1
+#fantasma Vermelho
 
-#fantasma2
+#fantasma
 
 #fantasma3
 
@@ -1496,6 +1668,11 @@ escreve_titulo:
 	jal 	pinta_retangulo
 					
 	jr $t7
+	##################################################
+	#	QUANDO O JOGADOR GANHA O JOGO
+	#################################################
+venceu:
+	j	exit
 	###########################################
 	#	SAI DO JOGO		#
 	###########################################
