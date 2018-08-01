@@ -24,7 +24,7 @@ bitmap_addr:		.word 0x10010000
 cor_pacman:		.word 0x00FFFF00
 cor_ponto:		.word 0x00e24638
 cor_preto:		.word 0x00000000
-cor_lab_azul:		.word 0x000000aa
+cor_lab_parede:		.word 0x000000aa
 cor_lab_branco:	.word 0x00FFFFFF
 
 cor_fantasma_vermelho:	.word 0x00df0902
@@ -32,9 +32,9 @@ cor_fantasma_azul:	.word 0x0061fafc
 cor_fantasma_laranja:	.word 0x00fc9711
 cor_fantasma_rosa:	.word 0x00fa9893
 
-fantasma_tam: 	.word 628 #158*4
-pacman_tam: 		.word 444 #111*4
-pacman_dir: 		.space  444 # 111*4
+fantasma_tam: 	.word 628 #158*4  -4 
+pacman_tam: 		.word 440 #111*4  - 4
+pacman_dir: 		.space  444 # 111*4 
 
 fantasma_vermelho:	.space  632 # 111*4
 fantasma_azul: 	.space  632 # 111*4
@@ -47,6 +47,7 @@ fantasma_rosa:	.space  632 # 111*4
 main:
 	sw 	$zero, pontuacao #pontuacao do jogo inicial
 	lw 	$t0, bitmap_addr
+	
 	j	 fase1
 	
 	#############################
@@ -71,19 +72,56 @@ fase1_loop:
 	#	FASE 2	#
 	#############################
 fase2:
-
+	li 	$s7, 0x0001ff00 #muda a cor do labirinto
+	sw 	$s7, cor_lab_parede
+	
+	li	$v0, 0	#deixa o pacman parado no inicio da fase
+	move	$v1, $v0
+	sw	$v0, 0xFFFF0004
+	
+	jal	pintar_tela
+	jal 	escreve_titulo
+	jal 	pinta_borda
+	jal 	cria_personagens
+	jal 	pinta_personagens
+	jal 	pinta_obstaculos
+	jal 	pinta_pontos_mapa1
+	jal 	mostra_placar
+	
 fase2_loop:
-
+	jal 	obter_teclado
+	jal 	direita_prox
+	sleep(16)
+	jal 	verificar_ganho_fase2
+	j	fase2_loop
+	
+pintar_tela:
+	lw $t0, bitmap_addr
+	lw $t1, cor_preto
+	lw $t2, bitmap_size
+	move $t3, $zero #contador de pixels
+	
+	
+bitmap_loop:
+	beq $t3, $t2, bitmap_exit #verifica se já é o ultimo endereco
+	sll $t4, $t3, 2  #multiplica por 4
+	add $t4, $t4, $t0 # pega a posicao certa do endereco
+	sw $t1, 0($t4) #armazena a cor no endereco
+	addi $t3, $t3, 1 #incrementa t3
+	j bitmap_loop #retorna ao loop
+	
+bitmap_exit:
+	jr	$ra
 	####################################################################3
 	#	VERIFICA SE TODOS OS PONTOS DO MAPA FORAM COMIDOS
 	####################################################################
 verificar_ganho_fase1:
 	lw	$s7, pontuacao
-	beq	$s7, 100, venceu #trocar pra fase2
+	beq	$s7, 100, fase2 #trocar pra fase2
 	jr	$ra
 verificar_ganho_fase2:
 	lw	$s7, pontuacao
-	beq	$s7, 100, venceu
+	beq	$s7, 200, venceu
 	jr	$ra
 	
 	#########################################################
@@ -551,7 +589,7 @@ verifica_laterais:
 	bgt	$t3, $t6, verifica_exit #verifica se já é o ultimo endereco
 	lw 	$t4, ($t3) 
 	addi 	$t3, $t3, 1024 #incrementa t3
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	beq	$t4, $t1, verifica_exit
 	j 	verifica_laterais
 	
@@ -561,7 +599,7 @@ verifica_topos:
 	bgt	$t3, $t6, verifica_exit #verifica se já é o ultimo endereco
 	lw	$t4, ($t3) 
 	addi	$t3, $t3, 4 #incrementa t3
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	beq	$t4, $t1, verifica_exit
 	j	verifica_topos
 verifica_exit:
@@ -931,6 +969,7 @@ nenhum:
 	#########################################################
 obter_teclado:
 ##Salva qual a movimentacao é no v0
+#salva a prox mocimentacao em v1
 	move	$t7, $ra
 	lw	$t0, 0xFFFF0004		
 tecla_direita:
@@ -1647,7 +1686,7 @@ exit_addr:
 	#	PINTA E LIMPA OS PERSONAGENS	#
 	#########################################################		
 pinta_personagens:
-	move	$t7, $ra
+	move	$s7, $ra
 #pacman
 	lw	$t1, cor_pacman
 	move	$t2, $zero
@@ -1683,7 +1722,7 @@ pinta_personagens:
 	lw	$t4, fantasma_tam
 	jal	pinta_personagens_loop
 	
-	jr	$t7
+	jr	$s7
 limpa_personagens:
 	lw	$t1, cor_preto
 	
@@ -1737,81 +1776,81 @@ obstaculos_mapa1:
 	li	$t3, 69104 #canto topo esquerdo do retangulo
 	li	$t6, 69140 #canto topo direito do retangulo
 	li	$t5, 101908 #canto inferior direito do retangulo
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo
 	
 	li	$t3, 84180 #canto topo esquerdo do retangulo
 	li	$t6, 84392 #canto topo direito do retangulo
 	li	$t5, 101800 #canto inferior direito do retangulo
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo  #retangulo topo esquerdo
 	
 	li	$t3, 84568 #canto topo esquerdo do retangulo
 	li	$t6, 84780 #canto topo direito do retangulo
 	li	$t5, 102188 #canto inferior direito do retangulo
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo #retangulo topo direito
 	
 	li	$t3, 215252 #canto topo esquerdo do retangulo
 	li	$t6, 215468 #canto topo direito do retangulo
 	li	$t5, 233900 #canto inferior direito do retangulo
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo #retangulo inferior esquerdo
 	
 	li	$t3, 215636 #canto topo esquerdo do retangulo
 	li	$t6, 215852 #canto topo direito do retangulo
 	li	$t5, 234284 #canto inferior direito do retangulo
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo #retangulo inferior direito
 	
 	#obstaculos centrais
 	li	$t3, 118256 #canto topo esquerdo do retangulo
 	li	$t6, 118292 #canto topo direito do retangulo
 	li	$t5, 130580 #canto inferior direito do retangulo
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo
 	#obstaculo U
 	li	$t3, 118140 #canto topo esquerdo do retangulo
 	li	$t6, 118184 #canto topo direito do retangulo
 	li	$t5, 159144 #canto inferior direito do retangulo
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo
 	
 	li	$t3, 149932 #canto topo esquerdo do retangulo
 	li	$t6, 150104 #canto topo direito do retangulo
 	li	$t5, 159320 #canto inferior direito do retangulo
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo
 	
 	li	$t3, 118364 #canto topo esquerdo do retangulo
 	li	$t6, 118408 #canto topo direito do retangulo
 	li	$t5, 159368 #canto inferior direito do retangulo
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo
 	
 	#Caixa dos fantasmas
 	li	$t3, 176508 #canto topo esquerdo do retangulo
 	li	$t6, 176532 #canto topo direito do retangulo
 	li	$t5, 199060 #canto inferior direito do retangulo
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo
 	
 	li	$t3, 194968 #canto topo esquerdo do retangulo
 	li	$t6, 195184 #canto topo direito do retangulo
 	li	$t5, 199280 #canto inferior direito do retangulo
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo
 	
 	li	$t3, 176752 #canto topo esquerdo do retangulo
 	li	$t6, 176776 #canto topo direito do retangulo
 	li	$t5, 199304 #canto inferior direito do retangulo
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo
 	
 	li	$t3, 176680 #canto topo esquerdo do retangulo
 	li	$t6, 176748 #canto topo direito do retangulo
 	li	$t5, 177772 #canto inferior direito do retangulo
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo
 	
 	li	$t3, 176604 #canto topo esquerdo do retangulo
@@ -1823,14 +1862,14 @@ obstaculos_mapa1:
 	li	$t3, 176520 #canto topo esquerdo do retangulo
 	li	$t6, 176600 #canto topo direito do retangulo
 	li	$t5, 177620 #canto inferior direito do retangulo
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo
 	
 	#Retangulo emaixo da caixa
 	li	$t3, 200176 #canto topo esquerdo do retangulo
 	li	$t6, 200212 #canto topo direito do retangulo
 	li	$t5, 235028 #canto inferior direito do retangulo
-	lw	$t1, cor_lab_azul
+	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo
 	
 	jr	$t7
@@ -1855,25 +1894,25 @@ pinta_borda:
 	li $t3, 68736 #canto topo esquerdo do retangulo
 	li $t6, 68752 #canto topo direito do retangulo
 	li $t5, 128144 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo #canto esquerdo topo
 	
 	li $t3, 118932 #canto topo esquerdo do retangulo
 	li $t6, 119052 #canto topo direito do retangulo
 	li $t5, 128268 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo #canto esquerdo 
 	
 	li $t3, 119056 #canto topo esquerdo do retangulo
 	li $t6, 119096 #canto topo direito do retangulo
 	li $t5, 152888 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	li $t3, 143488 #canto topo esquerdo do retangulo
 	li $t6, 143628 #canto topo direito do retangulo
 	li $t5, 152840 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	li $t3, 153728 #canto topo esquerdo do retangulo
@@ -1885,31 +1924,31 @@ pinta_borda:
 	li $t3, 170112 #canto topo esquerdo do retangulo
 	li $t6, 170244 #canto topo direito do retangulo
 	li $t5, 179460 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 
 	li $t3, 170248 #canto topo esquerdo do retangulo
 	li $t6, 170300 #canto topo direito do retangulo
 	li $t5, 199980 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	li $t3, 190592 #canto topo esquerdo do retangulo
 	li $t6, 190724 #canto topo direito do retangulo
 	li $t5, 199940 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo	
 	
 	li $t3, 200832 #canto topo esquerdo do retangulo
 	li $t6, 200848 #canto topo direito do retangulo
 	li $t5, 255120 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	li $t3, 251028 #canto topo esquerdo do retangulo
 	li $t6, 251776 #canto topo direito do retangulo
 	li $t5, 255872 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	##LADO DIREITO DO LABIRINTO
@@ -1917,25 +1956,25 @@ pinta_borda:
 	li $t3, 190320 #canto topo esquerdo do retangulo
 	li $t6, 190336 #canto topo direito do retangulo
 	li $t5, 250752 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	li $t3, 190192 #canto topo esquerdo do retangulo
 	li $t6, 190316 #canto topo direito do retangulo
 	li $t5, 199532 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	li $t3, 169672 #canto topo esquerdo do retangulo
 	li $t6, 169708 #canto topo direito do retangulo
 	li $t5, 199404 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	li $t3, 169712 #canto topo esquerdo do retangulo
 	li $t6, 169852 #canto topo direito do retangulo
 	li $t5, 179468 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	li $t3, 153464 #canto topo esquerdo do retangulo
@@ -1947,31 +1986,31 @@ pinta_borda:
 	li $t3, 143088 #canto topo esquerdo do retangulo
 	li $t6, 143228 #canto topo direito do retangulo
 	li $t5, 152444 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	li $t3, 118472 #canto topo esquerdo do retangulo
 	li $t6, 118508 #canto topo direito do retangulo
 	li $t5, 152300 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	li $t3, 118512 #canto topo esquerdo do retangulo
 	li $t6, 118656 #canto topo direito do retangulo
 	li $t5, 127872 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	li $t3, 69488 #canto topo esquerdo do retangulo
 	li $t6, 69504 #canto topo direito do retangulo
 	li $t5, 117632 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	li $t3, 63616 #canto topo esquerdo do retangulo
 	li $t6, 64384 #canto topo direito do retangulo
 	li $t5, 68480 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	
