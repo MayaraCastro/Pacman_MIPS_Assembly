@@ -17,16 +17,29 @@
 .end_macro
 
 .kdata
-pontuacao:	.word 0
-cor_pacman:	.word 0x00FFFF00
-cor_ponto:	.word 0x00e24638
-cor_preto:	.word 0x00000000
-cor_lab_azul:	.word 0x000000aa
-cor_lab_branco:.word 0x00FFFFFF
-bitmap_size:	.word 65536 # 256*256
-bitmap_addr:	.word 0x10010000
-pacman_tam: .word 444 #111*4
-pacman_dir: .space  444 # 111*4
+pontuacao:		.word 0
+bitmap_size:		.word 65536 # 256*256
+bitmap_addr:		.word 0x10010000
+
+cor_pacman:		.word 0x00FFFF00
+cor_ponto:		.word 0x00e24638
+cor_preto:		.word 0x00000000
+cor_lab_azul:		.word 0x000000aa
+cor_lab_branco:	.word 0x00FFFFFF
+
+cor_fantasma_vermelho:	.word 0x00df0902
+cor_fantasma_azul:	.word 0x0061fafc
+cor_fantasma_laranja:	.word 0x00fc9711
+cor_fantasma_rosa:	.word 0x00fa9893
+
+fantasma_tam: 	.word 628 #158*4
+pacman_tam: 		.word 444 #111*4
+pacman_dir: 		.space  444 # 111*4
+
+fantasma_vermelho:	.space  632 # 111*4
+fantasma_azul: 	.space  632 # 111*4
+fantasma_laranja: 	.space  632 # 111*4
+fantasma_rosa:	.space  632 # 111*4
 .text 
 
 .globl main
@@ -51,7 +64,6 @@ fase1_loop:
 	jal 	obter_teclado
 	jal 	direita_prox
 	sleep(16)
-	#jal 	mostra_placar
 	jal 	verificar_ganho_fase1
 	j	fase1_loop
 	
@@ -368,46 +380,46 @@ pinta_pontos_mapa1:
 	li 	$t3, 74928 #canto topo esquerdo do retangulo
 	li	$s2, 8
 	move	$t9, $zero
-	jal pontos_horizontal
+	jal	pontos_horizontal
 	
 	li 	$t3, 74928 #canto topo esquerdo do retangulo
 	li	$s2, 3
 	move	$t9, $zero
-	jal pontos_vertical
+	jal	pontos_vertical
 	
 
 	li 	$t3, 109744 #canto topo esquerdo do retangulo
 	li	$s2, 8
 	move	$t9, $zero
-	jal pontos_horizontal
+	jal	pontos_horizontal
 	
 	li 	$t3, 75208 #canto topo esquerdo do retangulo
 	li	$s2, 3
 	move	$t9, $zero
-	jal pontos_vertical
+	jal	pontos_vertical
 	
 	
 	#pontos no obstaculo U
 	li 	$t3, 126408 #canto topo esquerdo do retangulo
 	li	$s2, 2
 	move	$t9, $zero
-	jal pontos_vertical
+	jal	pontos_vertical
 	
 
 	li 	$t3, 138748 #canto topo esquerdo do retangulo
 	li	$s2, 1
 	move	$t9, $zero
-	jal pontos_horizontal
+	jal	pontos_horizontal
 	
 	li 	$t3, 110076 #canto topo esquerdo do retangulo
 	li	$s2, 1
 	move	$t9, $zero
-	jal pontos_horizontal
+	jal	pontos_horizontal
 	
 	li 	$t3, 126512 #canto topo esquerdo do retangulo
 	li	$s2, 2
 	move	$t9, $zero
-	jal pontos_vertical
+	jal	pontos_vertical
 	
 	
 	#pontos retangulo direito topo
@@ -415,80 +427,80 @@ pinta_pontos_mapa1:
 	li 	$t3, 75312 #canto topo esquerdo do retangulo
 	li	$s2, 8
 	move	$t9, $zero
-	jal pontos_horizontal
+	jal	pontos_horizontal
 	
 	li 	$t3, 75312 #canto topo esquerdo do retangulo
 	li	$s2, 3
 	move	$t9, $zero
-	jal pontos_vertical
+	jal	pontos_vertical
 	
 
 	li 	$t3, 110128 #canto topo esquerdo do retangulo
 	li	$s2, 8
 	move	$t9, $zero
-	jal pontos_horizontal
+	jal	pontos_horizontal
 	
 	li 	$t3, 75592 #canto topo esquerdo do retangulo
 	li	$s2, 3
 	move	$t9, $zero
-	jal pontos_vertical
+	jal	pontos_vertical
 	
 	#pontos retangulo direito inferior
 
 	li 	$t3, 206384 #canto topo esquerdo do retangulo
 	li	$s2, 8
 	move	$t9, $zero
-	jal pontos_horizontal
+	jal	pontos_horizontal
 	
 	li 	$t3, 206384 #canto topo esquerdo do retangulo
 	li	$s2, 3
 	move	$t9, $zero
-	jal pontos_vertical
+	jal	pontos_vertical
 	
 
 	li 	$t3, 241200 #canto topo esquerdo do retangulo
 	li	$s2, 8
 	move	$t9, $zero
-	jal pontos_horizontal
+	jal	pontos_horizontal
 	
 	li 	$t3, 206664 #canto topo esquerdo do retangulo
 	li	$s2, 3
 	move	$t9, $zero
-	jal pontos_vertical
+	jal	pontos_vertical
 	
 	#pontos retangulo esquerdo inferior 
 	li 	$t3, 206000 #canto topo esquerdo do retangulo
 	li	$s2, 8
 	move	$t9, $zero
-	jal pontos_horizontal
+	jal	pontos_horizontal
 	
 	li 	$t3, 206000 #canto topo esquerdo do retangulo
 	li	$s2, 3
 	move	$t9, $zero
-	jal pontos_vertical
+	jal	pontos_vertical
 	
 
 	li 	$t3, 240816 #canto topo esquerdo do retangulo
 	li	$s2, 8
 	move	$t9, $zero
-	jal pontos_horizontal
+	jal	pontos_horizontal
 	
 	li 	$t3, 206280 #canto topo esquerdo do retangulo
 	li	$s2, 3
 	move	$t9, $zero
-	jal pontos_vertical
+	jal	pontos_vertical
 	
 	# pontos dos corredores
 	li 	$t3, 123220 #canto topo esquerdo do retangulo
 	li	$s2, 7
 	move	$t9, $zero
-	jal pontos_vertical
+	jal	pontos_vertical
 	
 	
 	li 	$t3, 124580 #canto topo esquerdo do retangulo
 	li	$s2, 7
 	move	$t9, $zero
-	jal pontos_vertical
+	jal	pontos_vertical
 	
 	jr $t7
 pontos_horizontal:
@@ -507,7 +519,7 @@ pontos_horizontal_loop:
 	
 	addi	$t3, $t3, -2048 # seta pro topo direito do ponto
 	addi	$t3, $t3, 28 #prox ponto em 28 pixeis
-	j pontos_horizontal_loop
+	j	pontos_horizontal_loop
 pontos_vertical:
 	move $s3, $ra
 pontos_vertical_loop:
@@ -523,7 +535,7 @@ pontos_vertical_loop:
 	
 	addi	$t3, $t3, -12 # seta pro topo direito do ponto
 	addi	$t3, $t3, 10240#prox ponto em 28 pixeis
-	j pontos_vertical_loop
+	j	pontos_vertical_loop
 pontos_exit:
 	jr 	$s3
 
@@ -589,7 +601,7 @@ come_ponto_lateral_loop:
 	j 	come_ponto_lateral_loop
 	
 comeu:
-	move $t9, $t3
+	move	$t9, $t3
 come_ponto_exit:
 	jr	$ra
 	###########################################################
@@ -641,7 +653,7 @@ direita_loop:
 	addi	$t5, $t5, 4
 	bgt	$t5, $a1, move_exit
 	#jal	pinta_personagens
-	j direita_loop
+	j	direita_loop
 	#bgt	$t4, 0x10010000, acima_loop_ext
 move_esquerda:
 	move 	$a3, $ra
@@ -675,7 +687,7 @@ come_ponto_esquerda: #apaga o ponto que comeu do mapa e incrementa a pontuacao
 	move	$t7,$s5
 n_come_ponto_esquerda:
 
-	jal limpa_personagens
+	jal	limpa_personagens
 	move	$t5, $zero
 esquerda_loop:
 	add $t2, $t5, $a2
@@ -775,12 +787,12 @@ baixo_loop:
 	addi	$t5, $t5, 4
 	bgt	$t5, $a1, move_exit
 	#jal	pinta_personagens
-	j baixo_loop
+	j	baixo_loop
 	#bgt	$t4, 0x10010000, acima_loop_ext
 move_exit:
-	jal pinta_personagens
+	jal	pinta_personagens
 
-	jr $a3
+	jr	$a3
 	
 	########################################################
 	#	VERIFICA QUAL A MOVIMENTACAO A SER FEITA #
@@ -791,7 +803,7 @@ move_exit:
 	########################################################
 	#VERIFICA SE PODE MOVER PARA A PROXIMA DIRECAO
 direita_prox:
-	move $t7, $ra
+	move	$t7, $ra
 #depois botar pra todos os lados do pacman
 	bne	$v0, 1, esquerda_prox
 	
@@ -805,7 +817,7 @@ direita_prox:
 	la	$a2, pacman_dir
 	lw 	$a1, pacman_tam
 	jal	move_direita
-	jr $t7
+	jr	$t7
 esquerda_prox:
 	bne	$v0, 2, cima_prox
 	
@@ -819,7 +831,7 @@ esquerda_prox:
 	la	$a2, pacman_dir
 	lw 	$a1, pacman_tam
 	jal	move_esquerda
-	jr $t7
+	jr	$t7
 cima_prox:
 	bne	$v1, 3, baixo_prox
 	
@@ -833,7 +845,7 @@ cima_prox:
 	la	$a2, pacman_dir
 	lw 	$a1, pacman_tam
 	jal	move_cima
-	jr $t7
+	jr	$t7
 	#j	main_1
 baixo_prox:
 	bne	$v1, 4, direita
@@ -848,7 +860,7 @@ baixo_prox:
 	la	$a2, pacman_dir
 	lw 	$a1, pacman_tam
 	jal	move_baixo
-	jr $t7
+	jr	$t7
 	
 	##CONTINUA MOVENDO NA DIRECAO ATUAL	
 direita:
@@ -866,7 +878,7 @@ direita:
 	la	$a2, pacman_dir
 	lw 	$a1, pacman_tam
 	jal	move_direita
-	jr $t7
+	jr	$t7
 esquerda:
 	bne	$v0, 2, cima
 	
@@ -880,7 +892,7 @@ esquerda:
 	la	$a2, pacman_dir
 	lw 	$a1, pacman_tam
 	jal	move_esquerda
-	jr $t7
+	jr	$t7
 cima:
 	bne	$v0, 3, baixo
 	
@@ -894,7 +906,7 @@ cima:
 	la	$a2, pacman_dir
 	lw 	$a1, pacman_tam
 	jal	move_cima
-	jr $t7
+	jr	$t7
 	#j	main_1
 baixo:
 	bne	$v0, 4, nenhum
@@ -909,9 +921,9 @@ baixo:
 	la	$a2, pacman_dir
 	lw 	$a1, pacman_tam
 	jal	move_baixo
-	jr $t7
+	jr	$t7
 nenhum:
-	jr $t7
+	jr	$t7
 	
 	#########################################################
 	#	OBTEM TECLA PARA AS MOVIMENTACOES         #
@@ -919,8 +931,8 @@ nenhum:
 	#########################################################
 obter_teclado:
 ##Salva qual a movimentacao é no v0
-	move $t7, $ra
-	lw $t0, 0xFFFF0004		
+	move	$t7, $ra
+	lw	$t0, 0xFFFF0004		
 tecla_direita:
 	bne 	$t0, 100, tecla_esquerda
 	
@@ -976,7 +988,7 @@ tecla_baixo:
 tecla_voltar:
 	#li $t0, 0xFFFF0004
 	#sw $zero, ($t0)
-	jr $t7
+	jr	$t7
 
 	#########################################################
 	#	POVOA COM OS ENDERECOS DOS PERSONAGENS	#
@@ -986,137 +998,721 @@ cria_personagens:
 	#$t6 -> endereco a direita da linha
 	#t5 -> endereco do ultimo pixel a adicionar
 	#t8 -> endereco do array
-	move $t7, $ra
+	move	$t7, $ra
 	
 	#mapa1
 personagens_mapa1:
-	move $t7, $ra
+	move	$t7, $ra
 #pacman 
-	la $t8, pacman_dir
-	li $t2, 0
+	la	$t8, pacman_dir
+	li	$t2, 0
 	
 	
-	li $t3, 237048
-	li $t6, 237064
-	li $t5, 237064
-	jal addr_retangulo
+	li	$t3, 237048
+	li	$t6, 237064
+	li	$t5, 237064
+	jal	addr_retangulo
 	
-	li $t3, 238064
-	li $t6, 238096
-	li $t5, 238096
-	jal addr_retangulo
+	li	$t3, 238064
+	li	$t6, 238096
+	li	$t5, 238096
+	jal	addr_retangulo
 	
-	li $t3, 239084
-	li $t6, 239124
-	li $t5, 239124
-	jal addr_retangulo
+	li	$t3, 239084
+	li	$t6, 239124
+	li	$t5, 239124
+	jal	addr_retangulo
 		
-	li $t3, 240108
-	li $t6, 240148
-	li $t5, 240148
-	jal addr_retangulo
+	li	$t3, 240108
+	li	$t6, 240148
+	li	$t5, 240148
+	jal	addr_retangulo
 	
-	li $t3, 241128
-	li $t6, 241164
-	li $t5, 241164
-	jal addr_retangulo
+	li	$t3, 241128
+	li	$t6, 241164
+	li	$t5, 241164
+	jal	addr_retangulo
 	
-	li $t3, 242152
-	li $t6, 242180
-	li $t5, 242180
-	jal addr_retangulo
+	li	$t3, 242152
+	li	$t6, 242180
+	li	$t5, 242180
+	jal	addr_retangulo
 	
-	li $t3, 243176
-	li $t6, 243192
-	li $t5, 243192
-	jal addr_retangulo
+	li	$t3, 243176
+	li	$t6, 243192
+	li	$t5, 243192
+	jal	addr_retangulo
 		
-	li $t3, 244200
-	li $t6, 244224
-	li $t5, 244224
-	jal addr_retangulo
+	li	$t3, 244200
+	li	$t6, 244224
+	li	$t5, 244224
+	jal	addr_retangulo
 	
-	li $t3, 245224
-	li $t6, 245260
-	li $t5, 245260
-	jal addr_retangulo
+	li	$t3, 245224
+	li	$t6, 245260
+	li	$t5, 245260
+	jal	addr_retangulo
 	
 
-	li $t3, 246252
-	li $t6, 246292
-	li $t5, 246292
-	jal addr_retangulo
+	li	$t3, 246252
+	li	$t6, 246292
+	li	$t5, 246292
+	jal	addr_retangulo
 	
-	li $t3, 247276
-	li $t6, 247316
-	li $t5, 247316
-	jal addr_retangulo
+	li	$t3, 247276
+	li	$t6, 247316
+	li	$t5, 247316
+	jal	addr_retangulo
 		
-	li $t3, 248304
-	li $t6, 248336
-	li $t5, 248336
-	jal addr_retangulo
+	li	$t3, 248304
+	li	$t6, 248336
+	li	$t5, 248336
+	jal	addr_retangulo
 	
-	li $t3, 249336
-	li $t6, 249352
-	li $t5, 249352
-	jal addr_retangulo
+	li	$t3, 249336
+	li	$t6, 249352
+	li	$t5, 249352
+	jal	addr_retangulo
 	
 
 #fantasma Vermelho
-
-#fantasma
-
-#fantasma3
-
-#fantasma4
-
-	jr $t7
+	la	$t8, fantasma_vermelho
+	li	$t2, 0
+	
+	li	$s6,161276 #endereco do pixel esquerdo do topo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,12 
+	move	$t5, $t6
+	jal	addr_retangulo 
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-8
+	addi	$t3,$t3,1024
+	move	$s6, $t3
+	move	$t6, $t3
+	addi	$t6, $t6,28 
+	move	$t5, $t6
+	jal	addr_retangulo 
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-4
+	addi	$t3,$t3,1024
+	move	$s6, $t3
+	move	$t6, $t3
+	addi	$t6, $t6,36 
+	move	$t5, $t6
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-4
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,2048
+	move	$t6, $t3
+	addi	$t6, $t6,44 
+	move	$t5, $t6
+	addi	$t5, $t5, 2048
+	jal	addr_retangulo  
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-4
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,5120
+	move	$t6, $t3
+	addi	$t6, $t6,52 
+	move	$t5, $t6
+	addi	$t5, $t5, 5120
+	jal	addr_retangulo
+	
+	##calda
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,12
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,8 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,20
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,8 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,16
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	#calda linha 2
+	move	$t3, $s6
+	addi	$t3,$t3,4
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,0 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-20
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,0 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+###############	
+#fantasma rosa#
+###############
+	la	$t8, fantasma_rosa
+	li	$t2, 0
+	
+	li	$s6,179708 #endereco do pixel esquerdo do topo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,12 
+	move	$t5, $t6
+	jal	addr_retangulo 
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-8
+	addi	$t3,$t3,1024
+	move	$s6, $t3
+	move	$t6, $t3
+	addi	$t6, $t6,28 
+	move	$t5, $t6
+	jal	addr_retangulo 
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-4
+	addi	$t3,$t3,1024
+	move	$s6, $t3
+	move	$t6, $t3
+	addi	$t6, $t6,36 
+	move	$t5, $t6
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-4
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,2048
+	move	$t6, $t3
+	addi	$t6, $t6,44 
+	move	$t5, $t6
+	addi	$t5, $t5, 2048
+	jal	addr_retangulo  
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-4
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,5120
+	move	$t6, $t3
+	addi	$t6, $t6,52 
+	move	$t5, $t6
+	addi	$t5, $t5, 5120
+	jal	addr_retangulo
+	
+	##calda
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,12
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,8 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,20
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,8 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,16
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	#calda linha 2
+	move	$t3, $s6
+	addi	$t3,$t3,4
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,0 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-20
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,0 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+##################	
+#fantasma laranja#
+##################
+	la	$t8, fantasma_laranja
+	li	$t2, 0
+	
+	li	$s6,179780 #endereco do pixel esquerdo do topo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,12 
+	move	$t5, $t6
+	jal	addr_retangulo 
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-8
+	addi	$t3,$t3,1024
+	move	$s6, $t3
+	move	$t6, $t3
+	addi	$t6, $t6,28 
+	move	$t5, $t6
+	jal	addr_retangulo 
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-4
+	addi	$t3,$t3,1024
+	move	$s6, $t3
+	move	$t6, $t3
+	addi	$t6, $t6,36 
+	move	$t5, $t6
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-4
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,2048
+	move	$t6, $t3
+	addi	$t6, $t6,44 
+	move	$t5, $t6
+	addi	$t5, $t5, 2048
+	jal	addr_retangulo  
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-4
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,5120
+	move	$t6, $t3
+	addi	$t6, $t6,52 
+	move	$t5, $t6
+	addi	$t5, $t5, 5120
+	jal	addr_retangulo
+	
+	##calda
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,12
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,8 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,20
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,8 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,16
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	#calda linha 2
+	move	$t3, $s6
+	addi	$t3,$t3,4
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,0 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-20
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,0 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+###############
+#fantasma azul#
+###############
+	la	$t8, fantasma_azul
+	li	$t2, 0
+	
+	li	$s6,179636 #endereco do pixel esquerdo do topo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,12 
+	move	$t5, $t6
+	jal	addr_retangulo 
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-8
+	addi	$t3,$t3,1024
+	move	$s6, $t3
+	move	$t6, $t3
+	addi	$t6, $t6,28 
+	move	$t5, $t6
+	jal	addr_retangulo 
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-4
+	addi	$t3,$t3,1024
+	move	$s6, $t3
+	move	$t6, $t3
+	addi	$t6, $t6,36 
+	move	$t5, $t6
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-4
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,2048
+	move	$t6, $t3
+	addi	$t6, $t6,44 
+	move	$t5, $t6
+	addi	$t5, $t5, 2048
+	jal	addr_retangulo  
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-4
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,5120
+	move	$t6, $t3
+	addi	$t6, $t6,52 
+	move	$t5, $t6
+	addi	$t5, $t5, 5120
+	jal	addr_retangulo
+	
+	##calda
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,12
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,8 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,20
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,8 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,16
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	#calda linha 2
+	move	$t3, $s6
+	addi	$t3,$t3,4
+	addi	$t3,$t3,1024
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,0 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-20
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,4 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,0
+	addi	$s6, $t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,0 
+	move	$t5, $t6
+	addi	$t5, $t5, 0
+	jal	addr_retangulo
+	
+	jr	$t7
 	
 	#mapa2
 personagens_mapa2:
 
-	jr $t7
+	jr	$t7
+	
 	#######################################################################
 	#	POVOA O ARRAY COM ENDERECOS BASEADO NO MAPA	#
 	#######################################################################
 addr_retangulo:
-	subu $t2, $t6, $t3 #pega a quantidade de posições entre uma ponta e outra
+	subu	$t2, $t6, $t3 #pega a quantidade de posições entre uma ponta e outra
 	
 addr_largura:
 
-	bgt $t3, $t6, addr_altura #verifica se já é o ultimo endereco
-	move $t4, $t3 #multiplica por 4
-	add $t4, $t4, $t0 # pega a posicao certa do endereco 
-	sw $t4,0($t8) #escreve no array a palavra em t4
-	addi $t3, $t3, 4 #incrementa t3
-	addi $t8, $t8, 4 #incrementa t8
-	j addr_largura #retorna ao loop
+	bgt	$t3, $t6, addr_altura #verifica se já é o ultimo endereco
+	move	$t4, $t3 #multiplica por 4
+	add	$t4, $t4, $t0 # pega a posicao certa do endereco 
+	sw	$t4,0($t8) #escreve no array a palavra em t4
+	addi	$t3, $t3, 4 #incrementa t3
+	addi	$t8, $t8, 4 #incrementa t8
+	j	addr_largura #retorna ao loop
 addr_altura:
-	bgt $t3, $t5, exit_addr
-	addi $t6, $t6, 1024 #pula a linha
-	subu $t3, $t6, $t2 # nova posição do canto esquerdo, baseado na distancia de t6 e t3
-	j addr_largura
+	bgt	$t3, $t5, exit_addr
+	addi	$t6, $t6, 1024 #pula a linha
+	subu	$t3, $t6, $t2 # nova posição do canto esquerdo, baseado na distancia de t6 e t3
+	j	addr_largura
 exit_addr:
-	jr $ra
+	jr	$ra
 	
 	#########################################################
 	#	PINTA E LIMPA OS PERSONAGENS	#
 	#########################################################		
 pinta_personagens:
+	move	$t7, $ra
 #pacman
 	lw	$t1, cor_pacman
 	move	$t2, $zero
-	la $t8, pacman_dir
-	lw $t4, pacman_tam
-	j pinta_personagens_loop
+	la	$t8, pacman_dir
+	lw	$t4, pacman_tam
+	jal	pinta_personagens_loop
 	
+#fantasma vermelho
+	lw	$t1, cor_fantasma_vermelho
+	move	$t2, $zero
+	la	$t8, fantasma_vermelho
+	lw	$t4, fantasma_tam
+	jal	pinta_personagens_loop
+	
+#fantasma laranja
+	lw	$t1, cor_fantasma_laranja
+	move	$t2, $zero
+	la	$t8, fantasma_laranja
+	lw	$t4, fantasma_tam
+	jal	pinta_personagens_loop
+
+#fantasma azul
+	lw	$t1, cor_fantasma_azul
+	move	$t2, $zero
+	la	$t8, fantasma_azul
+	lw	$t4, fantasma_tam
+	jal	pinta_personagens_loop
+	
+#fantasma rosa
+	lw	$t1, cor_fantasma_rosa
+	move	$t2, $zero
+	la	$t8, fantasma_rosa
+	lw	$t4, fantasma_tam
+	jal	pinta_personagens_loop
+	
+	jr	$t7
 limpa_personagens:
 	lw	$t1, cor_preto
+	
 	move	$t2, $zero
-	la $t8, pacman_dir
-	lw $t4, pacman_tam
-	j pinta_personagens_loop
+	la	$t8, pacman_dir
+	lw	$t4, pacman_tam
+	j	pinta_personagens_loop
+#fantasma rosa
+	move	$t2, $zero
+	la	$t8, fantasma_rosa
+	lw	$t4, fantasma_tam
+	j	pinta_personagens_loop
+#fantasma azul
+	move	$t2, $zero
+	la	$t8, fantasma_azul
+	lw	$t4, fantasma_tam
+	j	pinta_personagens_loop
+	
+#fantasma laranja
+	move	$t2, $zero
+	la	$t8, fantasma_laranja
+	lw	$t4, fantasma_tam
+	j	pinta_personagens_loop
+
+#fantasma vermelho
+	move	$t2, $zero
+	la	$t8, fantasma_vermelho
+	lw	$t4, fantasma_tam
+	j	pinta_personagens_loop
 	
 pinta_personagens_loop:
 
@@ -1125,7 +1721,8 @@ pinta_personagens_loop:
 	sw	$t1, ($t3)
 	addi	$t2, $t2, 4
 	bgt	$t2, $t4, pinta_personagens_exit
-	j pinta_personagens_loop
+	j	pinta_personagens_loop
+	
 pinta_personagens_exit:
 	jr	$ra
 	
@@ -1133,114 +1730,114 @@ pinta_personagens_exit:
 	#	PINTA OS OBSTACULOS NO MAPA		#
 	#########################################################
 pinta_obstaculos:
-	move $t7, $ra	
+	move	$t7, $ra	
 	#mapa1
 obstaculos_mapa1:
 	
-	li $t3, 69104 #canto topo esquerdo do retangulo
-	li $t6, 69140 #canto topo direito do retangulo
-	li $t5, 101908 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
-	jal pinta_retangulo
+	li	$t3, 69104 #canto topo esquerdo do retangulo
+	li	$t6, 69140 #canto topo direito do retangulo
+	li	$t5, 101908 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_azul
+	jal	pinta_retangulo
 	
-	li $t3, 84180 #canto topo esquerdo do retangulo
-	li $t6, 84392 #canto topo direito do retangulo
-	li $t5, 101800 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
-	jal pinta_retangulo  #retangulo topo esquerdo
+	li	$t3, 84180 #canto topo esquerdo do retangulo
+	li	$t6, 84392 #canto topo direito do retangulo
+	li	$t5, 101800 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_azul
+	jal	pinta_retangulo  #retangulo topo esquerdo
 	
-	li $t3, 84568 #canto topo esquerdo do retangulo
-	li $t6, 84780 #canto topo direito do retangulo
-	li $t5, 102188 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
-	jal pinta_retangulo #retangulo topo direito
+	li	$t3, 84568 #canto topo esquerdo do retangulo
+	li	$t6, 84780 #canto topo direito do retangulo
+	li	$t5, 102188 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_azul
+	jal	pinta_retangulo #retangulo topo direito
 	
-	li $t3, 215252 #canto topo esquerdo do retangulo
-	li $t6, 215468 #canto topo direito do retangulo
-	li $t5, 233900 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
-	jal pinta_retangulo #retangulo inferior esquerdo
+	li	$t3, 215252 #canto topo esquerdo do retangulo
+	li	$t6, 215468 #canto topo direito do retangulo
+	li	$t5, 233900 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_azul
+	jal	pinta_retangulo #retangulo inferior esquerdo
 	
-	li $t3, 215636 #canto topo esquerdo do retangulo
-	li $t6, 215852 #canto topo direito do retangulo
-	li $t5, 234284 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
-	jal pinta_retangulo #retangulo inferior direito
+	li	$t3, 215636 #canto topo esquerdo do retangulo
+	li	$t6, 215852 #canto topo direito do retangulo
+	li	$t5, 234284 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_azul
+	jal	pinta_retangulo #retangulo inferior direito
 	
 	#obstaculos centrais
-	li $t3, 118256 #canto topo esquerdo do retangulo
-	li $t6, 118292 #canto topo direito do retangulo
-	li $t5, 130580 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
-	jal pinta_retangulo
+	li	$t3, 118256 #canto topo esquerdo do retangulo
+	li	$t6, 118292 #canto topo direito do retangulo
+	li	$t5, 130580 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_azul
+	jal	pinta_retangulo
 	#obstaculo U
-	li $t3, 118140 #canto topo esquerdo do retangulo
-	li $t6, 118184 #canto topo direito do retangulo
-	li $t5, 159144 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
-	jal pinta_retangulo
+	li	$t3, 118140 #canto topo esquerdo do retangulo
+	li	$t6, 118184 #canto topo direito do retangulo
+	li	$t5, 159144 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_azul
+	jal	pinta_retangulo
 	
-	li $t3, 149932 #canto topo esquerdo do retangulo
-	li $t6, 150104 #canto topo direito do retangulo
-	li $t5, 159320 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
-	jal pinta_retangulo
+	li	$t3, 149932 #canto topo esquerdo do retangulo
+	li	$t6, 150104 #canto topo direito do retangulo
+	li	$t5, 159320 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_azul
+	jal	pinta_retangulo
 	
-	li $t3, 118364 #canto topo esquerdo do retangulo
-	li $t6, 118408 #canto topo direito do retangulo
-	li $t5, 159368 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
-	jal pinta_retangulo
+	li	$t3, 118364 #canto topo esquerdo do retangulo
+	li	$t6, 118408 #canto topo direito do retangulo
+	li	$t5, 159368 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_azul
+	jal	pinta_retangulo
 	
 	#Caixa dos fantasmas
-	li $t3, 176508 #canto topo esquerdo do retangulo
-	li $t6, 176532 #canto topo direito do retangulo
-	li $t5, 199060 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
-	jal pinta_retangulo
+	li	$t3, 176508 #canto topo esquerdo do retangulo
+	li	$t6, 176532 #canto topo direito do retangulo
+	li	$t5, 199060 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_azul
+	jal	pinta_retangulo
 	
-	li $t3, 194968 #canto topo esquerdo do retangulo
-	li $t6, 195184 #canto topo direito do retangulo
-	li $t5, 199280 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
-	jal pinta_retangulo
+	li	$t3, 194968 #canto topo esquerdo do retangulo
+	li	$t6, 195184 #canto topo direito do retangulo
+	li	$t5, 199280 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_azul
+	jal	pinta_retangulo
 	
-	li $t3, 176752 #canto topo esquerdo do retangulo
-	li $t6, 176776 #canto topo direito do retangulo
-	li $t5, 199304 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
-	jal pinta_retangulo
+	li	$t3, 176752 #canto topo esquerdo do retangulo
+	li	$t6, 176776 #canto topo direito do retangulo
+	li	$t5, 199304 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_azul
+	jal	pinta_retangulo
 	
-	li $t3, 176680 #canto topo esquerdo do retangulo
-	li $t6, 176748 #canto topo direito do retangulo
-	li $t5, 177772 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
-	jal pinta_retangulo
+	li	$t3, 176680 #canto topo esquerdo do retangulo
+	li	$t6, 176748 #canto topo direito do retangulo
+	li	$t5, 177772 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_azul
+	jal	pinta_retangulo
 	
-	li $t3, 176604 #canto topo esquerdo do retangulo
-	li $t6, 176676 #canto topo direito do retangulo
-	li $t5, 177692 #canto inferior direito do retangulo
-	lw $t1, cor_lab_branco
-	jal pinta_retangulo #porta 
+	li	$t3, 176604 #canto topo esquerdo do retangulo
+	li	$t6, 176676 #canto topo direito do retangulo
+	li	$t5, 177692 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_branco
+	jal	pinta_retangulo #porta 
 	
-	li $t3, 176520 #canto topo esquerdo do retangulo
-	li $t6, 176600 #canto topo direito do retangulo
-	li $t5, 177620 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
-	jal pinta_retangulo
+	li	$t3, 176520 #canto topo esquerdo do retangulo
+	li	$t6, 176600 #canto topo direito do retangulo
+	li	$t5, 177620 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_azul
+	jal	pinta_retangulo
 	
 	#Retangulo emaixo da caixa
-	li $t3, 200176 #canto topo esquerdo do retangulo
-	li $t6, 200212 #canto topo direito do retangulo
-	li $t5, 235028 #canto inferior direito do retangulo
-	lw $t1, cor_lab_azul
-	jal pinta_retangulo
+	li	$t3, 200176 #canto topo esquerdo do retangulo
+	li	$t6, 200212 #canto topo direito do retangulo
+	li	$t5, 235028 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_azul
+	jal	pinta_retangulo
 	
-	jr $t7
+	jr	$t7
 	#mapa2
 obstaculos_mapa2:
 
-	jr $t7
+	jr	$t7
 	
 	###########################################
 	#	PINTA A BORDA DO MAPA	#
@@ -1251,7 +1848,7 @@ pinta_borda:
 	#t5 -> inferior direito
 	#t1 -> cor
 	
-	move $t7, $ra
+	move	$t7, $ra
 	##BORDA DO LABIRINTO
 	##LADO ESQUERDO DO LABIRINTO
 	
