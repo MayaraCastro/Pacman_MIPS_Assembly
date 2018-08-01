@@ -9,7 +9,15 @@
 #Base address for display: 0x10010000 (static data)
 #Movimentos : w,a,s,d
 
+#funcao sleep para dar um slow down nas movimentacoes
+.macro sleep(%tempo)
+	li 	$v0, 32 		
+	li 	$a0, %tempo
+	syscall
+.end_macro
+
 .kdata
+pontuacao:	.word 0
 cor_pacman:	.word 0x00FFFF00
 cor_ponto:	.word 0x00e24638
 cor_preto:	.word 0x00000000
@@ -24,8 +32,8 @@ pacman_dir: .space  444 # 111*4
 .globl main
 
 main:
-
-
+	
+	sw $zero, pontuacao #pontuacao do jogo inicial
 	lw $t0, bitmap_addr
 	jal escreve_titulo
 	jal pinta_borda
@@ -33,6 +41,8 @@ main:
 	jal pinta_personagens
 	jal pinta_obstaculos
 	jal pinta_pontos_mapa1
+	jal mostra_placar
+	
 	j main_1
 	j exit
 	
@@ -40,9 +50,297 @@ main_1:
 	jal obter_teclado
 	#li $v0, 1
 	jal direita_prox
+	sleep(30)
+	lw $s7, pontuacao
+	addi $s7, $s7, 1
+	sw $s7, pontuacao
+	jal mostra_placar
 #	jal limpa_personagens
 #	jal pinta_personagens
 	j main_1
+	
+	#########################################################
+	#	MOSTRA PLACAR DE PONTUACAO DO JOGO	#
+	#########################################################
+mostra_placar:
+	move 	$t7, $ra
+	
+	lw 	$t9, pontuacao # pega a pontuacao atual
+	
+	# pega o digito da terceira casa e salva em a2 
+	li 	$a1, 3	# posicao da casa
+	div	$a2, $t9, 100 #pega o digito da centena só	
+	mul 	$t1, $a2, 100 #tranforma em centena novamente
+	sub 	$t9, $t9, $t1 # subtrai do valor total 			
+	jal 	digito_placar
+
+	# pega o digita da segunda casa e salva em a2
+	li	$a1, 2	# posicao da casa
+	div	$a2, $t9, 10	# pega o digito da dezena
+	mul	$t1, $a2, 10	# transforma em dezena novamente
+	sub 	$t9, $t9, $t1	# subtrai do valor total para sobrar apenas a unidade			#
+	jal	 digito_placar
+	
+	# pega o digito da primeira casa e armazena em a2
+	li	$a1, 1 	#posicao da casa
+	move	$a2, $t9		
+	jal	digito_placar
+	
+	jr	$t7
+	
+	#######################################################################
+	#	DESENHA NA TELA UM DIGITO DO PLACAR DADO A SUA POSICAO	#
+	#	a2 -> digito				#
+	#	a1 -> posicao da casa do digito (1:unidade, 2:dezena, 3:centena)
+	#######################################################################
+digito_placar:
+	move	$t8,$ra
+casa1:
+	bne	$a1, 1, casa2
+	li	$s1, 49696 #endereco onde comeca a primeira casa
+	j	pintar_digito
+casa2:
+	bne	$a1, 2, casa3
+	li	$s1, 49648 #endereco onde comeca a segunda casa
+	j	pintar_digito
+casa3:
+	li	$s1, 49600 #endereco onde comeca a terceira casa
+pintar_digito:
+	
+digito_0:
+	bne	$a2, 0, digito_1
+	
+	addi 	$t3, $s1,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,32	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_lab_branco # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,8
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,16	#canto topo direito do retangulo
+	addi	$t5,$t6, 8192 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	j	digito_placar_exit
+digito_1:
+	bne	$a2, 1, digito_2
+	
+	addi 	$t3, $s1,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,32	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_lab_branco # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,0
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,12	#canto topo direito do retangulo
+	addi	$t5,$t6, 8192 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,28	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,4	#canto topo direito do retangulo
+	addi	$t5,$t6, 10240 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	j	digito_placar_exit
+digito_2:
+	bne	$a2, 2, digito_3
+	
+	addi 	$t3, $s1,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,32	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_lab_branco # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,0
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,24	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,8
+	addi 	$t3, $t3,8192	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,24	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	j	digito_placar_exit
+digito_3:
+	bne	$a2, 3, digito_4
+	
+	addi 	$t3, $s1,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,32	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_lab_branco # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,0
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,24	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,0
+	addi 	$t3, $t3,8192	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,24	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,0
+	addi 	$t3, $t3,5120	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,4	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	j	digito_placar_exit
+digito_4:
+	bne	$a2, 4, digito_5
+	
+	addi 	$t3, $s1,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,32	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_lab_branco # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,8
+	addi 	$t3, $t3,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,16	#canto topo direito do retangulo
+	addi	$t5,$t6, 4096 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,0
+	addi 	$t3, $t3,8192	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,24	#canto topo direito do retangulo
+	addi	$t5,$t6, 4096 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo	
+	
+	j	digito_placar_exit
+digito_5:
+	bne	$a2, 5, digito_6
+	
+	addi 	$t3, $s1,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,32	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_lab_branco # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,8
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,24	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,0
+	addi 	$t3, $t3,8192	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,24	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	j	digito_placar_exit
+digito_6:
+	bne	$a2, 6, digito_7
+	
+	addi 	$t3, $s1,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,32	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_lab_branco # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,8
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,24	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,8
+	addi 	$t3, $t3,8192	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,16	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	j	digito_placar_exit
+digito_7:
+	bne	$a2, 7, digito_8
+	
+	addi 	$t3, $s1,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,32	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_lab_branco # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,0
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,24	#canto topo direito do retangulo
+	addi	$t5,$t6, 10240 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	j	digito_placar_exit
+digito_8:
+	bne	$a2, 8, digito_9
+
+	addi 	$t3, $s1,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,32	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_lab_branco # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,8
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,16	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,8
+	addi 	$t3, $t3,8192	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,16	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	j	digito_placar_exit
+digito_9:
+
+	addi 	$t3, $s1,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,32	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_lab_branco # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,8
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,16	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s1,0
+	addi 	$t3, $t3,8192	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,24	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	j	digito_placar_exit
+	
+digito_placar_exit:
+	jr	$t8
 	
 	###########################################
 	#	PINTA OS PONTOS NO MAPA	#
@@ -911,33 +1209,38 @@ pinta_borda:
 	
 	jr $t7
 	
-	#############################
-	#      PINTA RETANGULOS	#
-	#############################
+	#######################################################################
+	#	PINTA RETANGULOS	
+	#	t3 -> endereco do topo esquerdo do retangulo
+	#	t6 -> endereco do topo direito
+	#	t5 -> endereco do canto inferior direito do retangulo
+	#	t1 -> cor 
+	#######################################################################
+
 pinta_retangulo:
-	subu $t2, $t6, $t3 #pega a quantidade de posições entre uma ponta e outra
-	
+	subu	$t2, $t6, $t3 #pega a quantidade de posições entre uma ponta e outra
+	lw $t0, bitmap_addr
 pinta_largura:
 
-	bgt $t3, $t6, pinta_altura #verifica se já é o ultimo endereco
-	move $t4, $t3 #multiplica por 4
-	add $t4, $t4, $t0 # pega a posicao certa do endereco
-	sw $t1, 0($t4) #armazena a cor no endereco
-	addi $t3, $t3, 4 #incrementa t3
-	j pinta_largura #retorna ao loop
+	bgt	$t3, $t6, pinta_altura #verifica se já é o ultimo endereco
+	move	$t4, $t3
+	add	$t4, $t4, $t0 # pega a posicao certa do endereco
+	sw	$t1, 0($t4) #armazena a cor no endereco
+	addi	$t3, $t3, 4 #incrementa t3
+	j	pinta_largura #retorna ao loop
 pinta_altura:
-	bgt $t3, $t5, exit_retangulo
-	addi $t6, $t6, 1024 #pula a linha
-	subu $t3, $t6, $t2 # nova posição do canto esquerdo, baseado na distancia de t6 e t3
-	j pinta_largura
+	bgt	$t3, $t5, exit_retangulo
+	addi	$t6, $t6, 1024 #pula a linha
+	subu	$t3, $t6, $t2 # nova posição do canto esquerdo, baseado na distancia de t6 e t3
+	j	pinta_largura
 exit_retangulo:
-	jr $ra
+	jr	$ra
 
 	###########################################
 	#	TITULO DO JOGO 	#
 	###########################################
 escreve_titulo:
-	move $t7, $ra
+	move	$t7, $ra
 	#P
 	li 	$t3, 6380 #canto topo esquerdo do retangulo
 	li 	$t6, 6452 #canto topo direito do retangulo
