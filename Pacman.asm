@@ -48,6 +48,8 @@ main:
 	sw 	$zero, pontuacao #pontuacao do jogo inicial
 	lw 	$t0, bitmap_addr
 	
+	li	$s7, 100
+	sw	$s7, pontuacao
 	j	 fase1
 	
 	#############################
@@ -55,10 +57,11 @@ main:
 	#############################
 fase1:
 	jal 	escreve_titulo
+	jal	escreve_fase1
 	jal 	pinta_borda
 	jal 	cria_personagens
 	jal 	pinta_personagens
-	jal 	pinta_obstaculos
+	jal 	obstaculos_fase1
 	jal 	pinta_pontos_mapa1
 	jal 	mostra_placar
 fase1_loop:
@@ -78,14 +81,15 @@ fase2:
 	li	$v0, 0	#deixa o pacman parado no inicio da fase
 	move	$v1, $v0
 	sw	$v0, 0xFFFF0004
-	
+	#jal	transicao_estagio
 	jal	pintar_tela
 	jal 	escreve_titulo
+	jal	escreve_fase2
 	jal 	pinta_borda
 	jal 	cria_personagens
 	jal 	pinta_personagens
-	jal 	pinta_obstaculos
-	jal 	pinta_pontos_mapa1
+	jal 	obstaculos_fase2
+	jal 	pinta_pontos_mapa2
 	jal 	mostra_placar
 	
 fase2_loop:
@@ -95,6 +99,38 @@ fase2_loop:
 	jal 	verificar_ganho_fase2
 	j	fase2_loop
 	
+	###########################################
+	#	TRANSICAO DE ESTAGIO	#
+	###########################################
+transicao_estagio:
+	move	$t7, $ra
+	li	$t8, 0
+	li	$t9, 261120
+transicao_loop:
+	sleep(10)
+	beq	$t9, 130048, transicao_exit
+	move	$t3, $t8 #canto topo esquerdo do retangulo
+	addi	$t6, $t3, 1020 #canto topo direito do retangulo 36
+	addi	$t5, $t6, 0 #canto inferior direito do retangulo
+	lw	$t1, cor_preto
+	jal	pinta_retangulo
+	
+	move	$t3, $t9 #canto topo esquerdo do retangulo
+	addi	$t6, $t3, 1020 #canto topo direito do retangulo 36
+	addi	$t5, $t6, 0 #canto inferior direito do retangulo
+	lw	$t1, cor_preto
+	jal	pinta_retangulo
+	
+	addi 	$t9, $t9, -1024
+	addi	$t8, $t8, 1024
+	j	transicao_loop
+	
+transicao_exit:
+	sleep(1000)
+	jr	$t7
+	#########################################
+	#	PINTA A TELA TODA DE PRETO	#
+	#########################################
 pintar_tela:
 	lw $t0, bitmap_addr
 	lw $t1, cor_preto
@@ -121,7 +157,7 @@ verificar_ganho_fase1:
 	jr	$ra
 verificar_ganho_fase2:
 	lw	$s7, pontuacao
-	beq	$s7, 200, venceu
+	beq	$s7, 209, venceu
 	jr	$ra
 	
 	#########################################################
@@ -530,17 +566,198 @@ pinta_pontos_mapa1:
 	
 	# pontos dos corredores
 	li 	$t3, 123220 #canto topo esquerdo do retangulo
-	li	$s2, 7
+	li	$s2, 3
 	move	$t9, $zero
 	jal	pontos_vertical
 	
+	li 	$t3, 179540 #canto topo esquerdo do retangulo
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_vertical
 	
 	li 	$t3, 124580 #canto topo esquerdo do retangulo
-	li	$s2, 7
+	li	$s2, 3
 	move	$t9, $zero
 	jal	pontos_vertical
 	
+	li 	$t3, 180900 #canto topo esquerdo do retangulo
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_vertical
+	
+	li 	$t3, 167492 #canto topo esquerdo do retangulo
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_horizontal
+
+	li 	$t3, 166284 #canto topo esquerdo do retangulo
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_horizontal
+		
 	jr $t7
+	
+pinta_pontos_mapa2:
+	
+	#pontos retangulo esquerdo topo
+	move 	$t7, $ra
+	
+	li 	$t3, 74928 #canto topo esquerdo do retangulo
+	li	$s2, 8
+	move	$t9, $zero
+	jal	pontos_horizontal
+	
+	li 	$t3, 85168 #canto topo esquerdo do retangulo
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_vertical
+	
+	li 	$t3, 85332 #canto topo esquerdo do retangulo
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_vertical
+
+	li 	$t3, 109744 #canto topo esquerdo do retangulo
+	li	$s2, 8
+	move	$t9, $zero
+	jal	pontos_horizontal
+	
+	li 	$t3, 75208 #canto topo esquerdo do retangulo
+	li	$s2, 3
+	move	$t9, $zero
+	jal	pontos_vertical
+	
+	
+	#pontos no obstaculo U
+	li 	$t3, 126408 #canto topo esquerdo do retangulo
+	li	$s2, 3
+	move	$t9, $zero
+	jal	pontos_vertical
+	
+	li 	$t3, 110076 #canto topo esquerdo do retangulo
+	li	$s2, 1
+	move	$t9, $zero
+	jal	pontos_horizontal
+	
+	li 	$t3, 126512 #canto topo esquerdo do retangulo
+	li	$s2, 3
+	move	$t9, $zero
+	jal	pontos_vertical
+	
+	
+	#pontos retangulo direito topo
+
+	li 	$t3, 75312 #canto topo esquerdo do retangulo
+	li	$s2, 8
+	move	$t9, $zero
+	jal	pontos_horizontal
+	
+	li 	$t3, 85552 #canto topo esquerdo do retangulo
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_vertical
+	
+	li 	$t3, 85672 #canto topo esquerdo do retangulo
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_vertical
+
+	li 	$t3, 110128 #canto topo esquerdo do retangulo
+	li	$s2, 8
+	move	$t9, $zero
+	jal	pontos_horizontal
+	
+	li 	$t3, 75592 #canto topo esquerdo do retangulo
+	li	$s2, 3
+	move	$t9, $zero
+	jal	pontos_vertical
+	
+	#pontos retangulo direito inferior
+
+	li 	$t3, 206384 #canto topo esquerdo do retangulo
+	li	$s2, 8
+	move	$t9, $zero
+	jal	pontos_horizontal
+	
+	li 	$t3, 216624 #canto topo esquerdo do retangulo +112
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_vertical
+	
+	li 	$t3, 216736 #canto topo esquerdo do retangulo +112
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_vertical
+
+	li 	$t3, 241200 #canto topo esquerdo do retangulo
+	li	$s2, 8
+	move	$t9, $zero
+	jal	pontos_horizontal
+	
+	li 	$t3, 206664 #canto topo esquerdo do retangulo
+	li	$s2, 3
+	move	$t9, $zero
+	jal	pontos_vertical
+	
+	#pontos retangulo esquerdo inferior 
+	li 	$t3, 206000 #canto topo esquerdo do retangulo
+	li	$s2, 8
+	move	$t9, $zero
+	jal	pontos_horizontal
+	
+	li 	$t3, 216240 #canto topo esquerdo do retangulo+164
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_vertical
+	
+	li 	$t3, 216404 #canto topo esquerdo do retangulo+164
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_vertical
+
+	li 	$t3, 240816 #canto topo esquerdo do retangulo
+	li	$s2, 8
+	move	$t9, $zero
+	jal	pontos_horizontal
+	
+	li 	$t3, 206280 #canto topo esquerdo do retangulo
+	li	$s2, 3
+	move	$t9, $zero
+	jal	pontos_vertical
+	
+	# pontos dos corredores
+	li 	$t3, 123220 #canto topo esquerdo do retangulo
+	li	$s2, 3
+	move	$t9, $zero
+	jal	pontos_vertical
+	
+	li 	$t3, 179540 #canto topo esquerdo do retangulo
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_vertical
+	
+	li 	$t3, 124580 #canto topo esquerdo do retangulo
+	li	$s2, 3
+	move	$t9, $zero
+	jal	pontos_vertical
+	
+	li 	$t3, 180900 #canto topo esquerdo do retangulo
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_vertical
+	
+	li 	$t3, 167492 #canto topo esquerdo do retangulo
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_horizontal
+
+	li 	$t3, 166284 #canto topo esquerdo do retangulo
+	li	$s2, 2
+	move	$t9, $zero
+	jal	pontos_horizontal
+	
+	jr $t7
+	
 pontos_horizontal:
 	move $s3,$ra 
 pontos_horizontal_loop:
@@ -680,6 +897,7 @@ come_ponto_direita: #apaga o ponto que comeu do mapa e incrementa a pontuacao
 	move	$a1,$s6
 	move	$a2,$s7
 	move	$t7,$s5
+
 n_come_ponto_direita:
 	jal 	limpa_personagens
 	move	$t5, $zero
@@ -1767,11 +1985,12 @@ pinta_personagens_exit:
 	
 	#########################################################
 	#	PINTA OS OBSTACULOS NO MAPA		#
-	#########################################################
-pinta_obstaculos:
-	move	$t7, $ra	
-	#mapa1
-obstaculos_mapa1:
+	#########################################################	
+###############
+# MAPA FASE 1 #
+###############
+obstaculos_fase1:
+	move	$t7, $ra
 	
 	li	$t3, 69104 #canto topo esquerdo do retangulo
 	li	$t6, 69140 #canto topo direito do retangulo
@@ -1873,9 +2092,148 @@ obstaculos_mapa1:
 	jal	pinta_retangulo
 	
 	jr	$t7
-	#mapa2
-obstaculos_mapa2:
+##################
+# MAPA DA FASE 2 #
+##################
+obstaculos_fase2:
+	move	$t7, $ra
+	
+	li	$t3, 69104 #canto topo esquerdo do retangulo
+	addi	$t6, $t3, 36 #canto topo direito do retangulo 36
+	addi	$t5, $t6, 32768 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo
+	
+	#RETANGULO ESQUERDO TOPO 1
+	li	$t3, 84180 #canto topo esquerdo do retangulo
+	addi	$t6, $t3, 100 #canto topo direito do retangulo 212
+	addi	$t5, $t6, 17408 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo  #retangulo topo esquerdo
+	
+	#RETANGULO ESQUERDO TOPO 2
+	li	$t3, 84340 #canto topo esquerdo do retangulo
+	addi	$t6, $t3, 56 #canto topo direito do retangulo 212
+	addi	$t5, $t6, 17408 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo  #retangulo topo esquerdo
+	
+	#RETANGULO DIREITO TOPO 1
+	li	$t3, 84560 #canto topo esquerdo do retangulo
+	addi	$t6, $t3, 56 #canto topo direito do retangulo 212
+	addi	$t5, $t6, 17408 #canto inferior direito do retangulo
+	#li	$t6, 84780 #canto topo direito do retangulo
+	#li	$t5, 102188 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo #retangulo topo direito
+	
+	#RETANGULO DIREITO TOPO 2
+	li	$t3, 84676 #canto topo esquerdo do retangulo
+	addi	$t6, $t3, 100 #canto topo direito do retangulo 212
+	addi	$t5, $t6, 17408 #canto inferior direito do retangulo
+	#li	$t6, 84780 #canto topo direito do retangulo
+	#li	$t5, 102188 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo #retangulo topo direito
 
+	
+	#RETANGULO ESQUERDO INFERIOR 1
+	li	$t3, 215252 #canto topo esquerdo do retangulo
+	addi	$t6, $t3, 100 #canto topo direito do retangulo 212
+	addi	$t5, $t6, 17408 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo  #retangulo topo esquerdo
+	
+	#RETANGULO ESQUERDO INFERIOR 2
+	li	$t3, 215412 #canto topo esquerdo do retangulo
+	addi	$t6, $t3, 56 #canto topo direito do retangulo 212
+	addi	$t5, $t6, 17408 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo  #retangulo topo esquerdo
+	
+	#RETANGULO DIREITO INFERIOR 1
+	li	$t3, 215636 #canto topo esquerdo do retangulo
+	addi	$t6, $t3, 52 #canto topo direito do retangulo 212
+	addi	$t5, $t6, 17408 #canto inferior direito do retangulo
+	#li	$t6, 84780 #canto topo direito do retangulo
+	#li	$t5, 102188 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo #retangulo topo direito
+	
+	#RETANGULO DIREITO INFERIOR 2
+	li	$t3, 215752 #canto topo esquerdo do retangulo
+	addi	$t6, $t3, 100 #canto topo direito do retangulo 212
+	addi	$t5, $t6, 17408 #canto inferior direito do retangulo
+	#li	$t6, 84780 #canto topo direito do retangulo
+	#li	$t5, 102188 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo #retangulo topo direito
+	#obstaculos centrais
+		#CENTRO
+	li	$t3, 118256 #canto topo esquerdo do retangulo
+	addi	$t6, $t3, 36 #canto topo direito do retangulo 212
+	addi	$t5, $t6, 40960 #canto inferior direito do retangulo
+	#li	$t6, 118292 #canto topo direito do retangulo
+	#li	$t5, 130580 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo
+		#obstaculo ESQUERDA
+	li	$t3, 118132 #canto topo esquerdo do retangulo
+	li	$t6, 118188 #canto topo direito do retangulo
+	li	$t5, 159148 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo
+
+		#OBSTACULO DIREITA
+	li	$t3, 118352 #canto topo esquerdo do retangulo
+	li	$t6, 118408 #canto topo direito do retangulo
+	li	$t5, 159368 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo
+	
+	#Caixa dos fantasmas
+	li	$t3, 176500 #canto topo esquerdo do retangulo
+	li	$t6, 176532 #canto topo direito do retangulo
+	li	$t5, 199060 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo
+	
+	li	$t3, 194968 #canto topo esquerdo do retangulo
+	li	$t6, 195184 #canto topo direito do retangulo
+	li	$t5, 199280 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo
+	
+	li	$t3, 176752 #canto topo esquerdo do retangulo
+	li	$t6, 176776 #canto topo direito do retangulo
+	li	$t5, 199304 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo
+	
+	li	$t3, 176680 #canto topo esquerdo do retangulo
+	li	$t6, 176748 #canto topo direito do retangulo
+	li	$t5, 177772 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo
+	
+	li	$t3, 176604 #canto topo esquerdo do retangulo
+	li	$t6, 176676 #canto topo direito do retangulo
+	li	$t5, 177692 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_branco
+	jal	pinta_retangulo #porta 
+	
+	li	$t3, 176520 #canto topo esquerdo do retangulo
+	li	$t6, 176600 #canto topo direito do retangulo
+	li	$t5, 177620 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo
+	
+	#Retangulo emaixo da caixa
+	li	$t3, 200176 #canto topo esquerdo do retangulo
+	li	$t6, 200212 #canto topo direito do retangulo
+	li	$t5, 235028 #canto inferior direito do retangulo
+	lw	$t1, cor_lab_parede
+	jal	pinta_retangulo
 	jr	$t7
 	
 	###########################################
@@ -1928,8 +2286,8 @@ pinta_borda:
 	jal pinta_retangulo
 
 	li $t3, 170248 #canto topo esquerdo do retangulo
-	li $t6, 170300 #canto topo direito do retangulo
-	li $t5, 199980 #canto inferior direito do retangulo
+	li $t6, 170296 #canto topo direito do retangulo
+	li $t5, 199976 #canto inferior direito do retangulo
 	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
@@ -2304,6 +2662,188 @@ escreve_titulo:
 	jal 	pinta_retangulo
 					
 	jr $t7
+	
+	#############################
+	#	STAGE ESCRITO	#
+	#############################
+escreve_fase:
+	move	$t8, $ra
+	
+#LETRA S	
+	addi 	$t3, $s6,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,32	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_fantasma_vermelho # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6,8
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,24	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6,0
+	addi 	$t3, $t3,8192	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,24	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo 
+
+#LETRA T
+	addi	$s6, $s6, 48
+	
+	addi 	$t3, $s6,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,36	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_fantasma_vermelho # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6,0
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,12	#canto topo direito do retangulo
+	addi	$t5,$t6, 10240 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6,24
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,12	#canto topo direito do retangulo
+	addi	$t5,$t6, 10248 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo 
+#LETRA A
+	addi	$s6, $s6, 48
+	
+	addi 	$t3, $s6,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,36	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_fantasma_vermelho # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6,16
+	addi 	$t3, $t3,3072	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,12	#canto topo direito do retangulo
+	addi	$t5,$t6, 3072 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6,16
+	addi 	$t3, $t3,9216	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,12	#canto topo direito do retangulo
+	addi	$t5,$t6, 3072 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo 
+#LETRA G
+	addi	$s6, $s6, 48
+	
+	addi 	$t3, $s6,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,44	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_fantasma_vermelho # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6,16
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,28	#canto topo direito do retangulo
+	addi	$t5,$t6, 3072 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6,16
+	addi 	$t3, $t3,8192	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,12	#canto topo direito do retangulo
+	addi	$t5,$t6, 3072 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo 
+	
+	addi 	$t3, $s6,16
+	addi 	$t3, $t3,4096	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,4	#canto topo direito do retangulo
+	addi	$t5,$t6, 3072 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo 
+#LETRA E	
+	addi	$s6, $s6, 56
+	
+	addi 	$t3, $s6,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,36	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_fantasma_vermelho # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6,16
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,28	#canto topo direito do retangulo
+	addi	$t5,$t6, 3072 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6,16
+	addi 	$t3, $t3,7168	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,28	#canto topo direito do retangulo
+	addi	$t5,$t6, 3072 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo 
+	jr	$t8	
+escreve_fase1:
+	
+	move	$t7, $ra
+	li	$s6,34180 #endereco do pixel esquerdo do topo
+	jal	escreve_fase
+	
+	addi	$s6, $s6, 60
+	
+	addi 	$t3, $s6,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,32	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_fantasma_vermelho # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6,0
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,12	#canto topo direito do retangulo
+	addi	$t5,$t6, 8192 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6,28	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,4	#canto topo direito do retangulo
+	addi	$t5,$t6, 10240 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	jr	$t7
+escreve_fase2:	
+	move	$t7, $ra
+	li	$s6,34152 #endereco do pixel esquerdo do topo
+	lw	$t1, cor_fantasma_vermelho
+	jal	escreve_fase
+	
+	addi	$s6, $s6, 60
+	
+		
+	addi 	$t3, $s6,0	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,32	#canto topo direito do retangulo
+	addi	$t5,$t6, 12288 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_fantasma_vermelho # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6,0
+	addi 	$t3, $t3,2048	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,24	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6,8
+	addi 	$t3, $t3,8192	#canto topo esquerdo do retangulo
+	addi 	$t6,$t3,24	#canto topo direito do retangulo
+	addi	$t5,$t6, 2048 #canto inferior direito do retangulo (12*1024)
+	lw 	$t1, cor_preto # cor
+	jal 	pinta_retangulo
+	
+	jr	$t7
 	##################################################
 	#	QUANDO O JOGADOR GANHA O JOGO
 	#################################################
