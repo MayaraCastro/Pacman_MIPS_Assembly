@@ -24,7 +24,7 @@ bitmap_addr:		.word 0x10010000
 cor_pacman:		.word 0x00FFFF00
 cor_ponto:		.word 0x00e24638
 cor_preto:		.word 0x00000000
-cor_lab_parede:		.word 0x000000aa
+cor_lab_parede:	.word 0x000000aa
 cor_lab_branco:	.word 0x00FFFFFF
 
 cor_fantasma_vermelho:	.word 0x00df0902
@@ -120,15 +120,15 @@ fase2_loop:
 movimenta_fantasma_vermelho:
 	move	$t7, $ra
 	
-	jal	$t7
+	jr	$t7
 	
 	###########################################
 	#	MOVIMENTA FANTASMA LARANJA	#
 	###########################################
-movimenta_fastasma_laranja:
+movimenta_fantasma_laranja:
 	move	$t7, $ra
 	
-	jal	$t7
+	jr	$t7
 	
 	###########################################
 	#	MOVIMENTA FANTASMA ROSA	#
@@ -136,7 +136,7 @@ movimenta_fastasma_laranja:
 movimenta_fantasma_rosa:
 	move	$t7, $ra
 	
-	jal	$t7
+	jr	$t7
 
 	###########################################
 	#	MOVIMENTA FANTASMA AZUL	#
@@ -144,8 +144,9 @@ movimenta_fantasma_rosa:
 movimenta_fantasma_azul:
 	move	$t7, $ra
 	
-	jal	$t7	
+	jr	$t7	
 	
+
 	###########################################
 	#	TRANSICAO DE ESTAGIO	#
 	###########################################
@@ -907,6 +908,7 @@ comeu:
 	move	$t9, $t3
 come_ponto_exit:
 	jr	$ra
+	
 	###########################################################
 	#	MOVIMENTA		                #
 	#	a2: o endereco do vetor a ser movimentado   #
