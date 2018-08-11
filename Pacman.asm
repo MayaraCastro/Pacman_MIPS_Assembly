@@ -66,7 +66,14 @@ fase1:
 	jal 	mostra_placar
 fase1_loop:
 	jal 	obter_teclado
-	jal 	direita_prox
+	jal 	direita_prox # faz a moviemtação do pacman
+	
+	#faz a movimentação dos fantasmas
+	jal	movimenta_fantasma_vermelho
+	jal	movimenta_fantasma_laranja
+	jal	movimenta_fantasma_azul
+	jal	movimenta_fantasma_rosa
+	
 	sleep(16)
 	jal 	verificar_ganho_fase1
 	j	fase1_loop
@@ -96,9 +103,48 @@ fase2_loop:
 	jal 	obter_teclado
 	jal 	direita_prox # faz a moviemtação do pacman
 		
+	#faz a movimentação dos fantasmas
+	jal	movimenta_fantasma_vermelho
+	jal	movimenta_fantasma_laranja
+	jal	movimenta_fantasma_azul
+	jal	movimenta_fantasma_rosa
+	
 	sleep(16)
 	jal 	verificar_ganho_fase2
 	j	fase2_loop
+	
+	
+	###########################################
+	#	MOVIMENTA FANTASMA VERMELHO	#
+	###########################################
+movimenta_fantasma_vermelho:
+	move	$t7, $ra
+	
+	jal	$t7
+	
+	###########################################
+	#	MOVIMENTA FANTASMA LARANJA	#
+	###########################################
+movimenta_fastasma_laranja:
+	move	$t7, $ra
+	
+	jal	$t7
+	
+	###########################################
+	#	MOVIMENTA FANTASMA ROSA	#
+	###########################################
+movimenta_fantasma_rosa:
+	move	$t7, $ra
+	
+	jal	$t7
+
+	###########################################
+	#	MOVIMENTA FANTASMA AZUL	#
+	###########################################
+movimenta_fantasma_azul:
+	move	$t7, $ra
+	
+	jal	$t7	
 	
 	###########################################
 	#	TRANSICAO DE ESTAGIO	#
