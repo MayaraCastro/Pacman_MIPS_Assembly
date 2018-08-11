@@ -94,7 +94,8 @@ fase2:
 	
 fase2_loop:
 	jal 	obter_teclado
-	jal 	direita_prox
+	jal 	direita_prox # faz a moviemtação do pacman
+		
 	sleep(16)
 	jal 	verificar_ganho_fase2
 	j	fase2_loop
@@ -128,6 +129,7 @@ transicao_loop:
 transicao_exit:
 	sleep(1000)
 	jr	$t7
+
 	#########################################
 	#	PINTA A TELA TODA DE PRETO	#
 	#########################################
