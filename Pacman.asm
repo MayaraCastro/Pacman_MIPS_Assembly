@@ -16,6 +16,91 @@
 	syscall
 .end_macro
 
+
+              ############################################################
+	#	MOVIMENTA		                #
+	#	%vetor: o endereco do vetor a ser movimentado   #
+	#	%tam: tamanho do array 
+	#	%vezes : quantidade de vezes que anda
+	###########################################################
+.macro move_fantasma_direita(%vetor, %tam, %vezes)
+	li	$a3, 0
+vezes_andar_direita:
+	addi	$a3, $a3, 1
+	sleep(16)
+	jal 	limpa_personagens
+	move	$t5, $zero
+direitaf_loop:
+	add 	$t2, $t5, %vetor
+	lw	$t4, ($t2)
+	addi	$t4, $t4, 4
+	sw	$t4, ($t2)
+	addi	$t5, $t5, 4
+	ble	$t5, %tam,direitaf_loop
+
+	jal	pinta_personagens
+	ble	$a3, %vezes, vezes_andar_direita
+.end_macro
+
+.macro move_fantasma_esquerda(%vetor, %tam, %vezes)
+	li	$a3, 0
+vezes_andar_esquerda:
+	addi	$a3, $a3, 1
+	sleep(16)
+	jal	limpa_personagens
+	move	$t5, $zero
+esquerdaf_loop:
+	add 	$t2, $t5, %vetor
+	lw	$t4, ($t2)
+	addi	$t4, $t4, -4
+	sw	$t4, ($t2)
+	addi	$t5, $t5, 4
+
+	ble	$t5, %tam,esquerdaf_loop
+
+	jal	pinta_personagens
+	ble	$a3, %vezes, vezes_andar_esquerda
+.end_macro
+
+.macro move_fantasma_cima(%vetor, %tam, %vezes) 
+	li	$a3, 0
+vezes_andar_cima:
+	addi	$a3, $a3, 1
+	sleep(16)
+	jal 	limpa_personagens
+	move	$t5, $zero
+acimaf_loop:
+	add	$t2, $t5, %vetor
+	lw	$t4, ($t2)#pacman_dir($t5)
+	addi	$t4, $t4, -1024 #decremenat a linha
+	sw	$t4, ($t2)
+	addi	$t5, $t5, 4
+
+	ble	$t5, %tam,acimaf_loop
+
+	jal	pinta_personagens
+	ble	$a3, %vezes, vezes_andar_cima
+.end_macro	
+
+.macro move_fantasma_baixo(%vetor, %tam, %vezes)
+	li	$a3, 0
+vezes_andar_baixo:
+	addi	$a3, $a3, 1
+	sleep(16)
+	jal	 limpa_personagens
+	move	$t5, $zero
+baixof_loop:
+	add 	$t2, $t5, %vetor
+	lw	$t4, ($t2)#pacman_dir($t5)
+	addi	$t4, $t4, 1024
+	sw	$t4, ($t2)
+	addi	$t5, $t5, 4
+	ble	$t5, %tam,baixof_loop
+
+	jal	pinta_personagens
+	ble	$a3, %vezes, vezes_andar_baixo
+.end_macro
+
 .kdata
 pontuacao:		.word 0
 bitmap_size:		.word 65536 # 256*256
@@ -74,6 +159,11 @@ fase1:
 	jal 	obstaculos_fase1
 	jal 	pinta_pontos_mapa1
 	jal 	mostra_placar
+	la	$a2, fantasma_rosa
+	lw	$a1, fantasma_tam 
+		
+		move_fantasma_cima($a2, $a1,17)
+		move_fantasma_direita($a2, $a1,41)
 fase1_loop:
 	#jal 	obter_teclado
 	#jal 	direita_prox # faz a moviemtação do pacman
@@ -82,8 +172,8 @@ fase1_loop:
 	#jal	movimenta_fantasma_vermelho
 	#jal	movimenta_fantasma_laranja
 	#jal	movimenta_fantasma_azul
-	jal	movimenta_fantasma_rosa
-
+	#jal	movimenta_fantasma_rosa
+	
 
 	
 	sleep(16)
@@ -132,6 +222,17 @@ fase2_loop:
 movimenta_fantasma_vermelho:
 	move	$t7, $ra
 	
+	lw	$t1, fantasma_vermelho  
+	lw	$a2, direcao_fvermelho
+ 	addi	$t5, $t5, -20 #pra por na posicao certa da verificacao do caminho
+	addi	$t5, $t5, -1024
+	jal	verifica_traversia
+	beq	$a1, 0, exit_vermelho # se não existe a traversia
+
+lw	$t1, fantasma_vermelho
+lw	$t2, pacman_dir
+div 	$t2, $t2, 4
+exit_vermelho:
 	jr	$t7
 	
 	###########################################
@@ -142,8 +243,8 @@ movimenta_fantasma_laranja:
     
 	lw	$t1, fantasma_laranja  
 	lw	$a2, direcao_flaranja
- 	addi	$t3, $t1, -20 #pra por na posicao certa da verificacao do caminho
-	addi	$t3, $t3, -1024
+ 	addi	$t5, $t5, -20 #pra por na posicao certa da verificacao do caminho
+	addi	$t5, $t5, -1024
 	jal	verifica_traversia
 	beq	$a1, 0, exit_laranja # se não existe a traversia
     
@@ -184,28 +285,28 @@ rosa_direita:
 	sw	$t2,direcao_frosa
 	la	$a2, fantasma_rosa
 	lw	$a1, fantasma_tam 
-	jal	move_fantasma_direita
+		move_fantasma_direita($a2, $a1, 1)
 	j	exit_rosa
 rosa_esquerda:  
 	li	$t2, 2
 	sw	$t2,direcao_frosa
 	la	$a2, fantasma_rosa
 	lw	$a1, fantasma_tam 
-	jal	move_fantasma_esquerda
+		move_fantasma_esquerda($a2, $a1,1)
 	j	exit_rosa
 rosa_cima:  
 	li	$t2, 3
 	sw	$t2,direcao_frosa
 	la	$a2, fantasma_rosa
 	lw	$a1, fantasma_tam 
-	jal	move_fantasma_cima
+		move_fantasma_cima($a2, $a1,1)
 	j	exit_rosa
 rosa_baixo:  
 	li	$t2, 4
 	sw	$t2,direcao_frosa
 	la	$a2, fantasma_rosa
 	lw	$a1, fantasma_tam 
-	jal	move_fantasma_baixo
+		move_fantasma_baixo($a2, $a1,1)
 	
 	j	exit_rosa
  
@@ -239,8 +340,9 @@ verifica_traversia:
 verifica_traversia_direita:
     
 	addi	$t3, $t5,52
+	addi	$t3, $t3,1024
 	move	$t6, $t3
-	addi	$t6, $t6, 15360
+	addi	$t6, $t6, 13312
 	jal	verifica_laterais
 	beq	$a3, 1, verifica_traversia_esquerda
     
@@ -252,8 +354,9 @@ verifica_traversia_esquerda:
 	addi	$t9, $t9, 4
 	
     	move	$t3, $t5
+    	addi	$t3, $t3,1024
 	move	$t6, $t3
-	addi	$t6, $t6, 15360
+	addi	$t6, $t6, 13312
 	jal 	verifica_laterais
 	beq	$a3, 1, verifica_traversia_cima
     
@@ -325,83 +428,7 @@ tem_traversia:
 	li	$a3, 1
 	jr	$ra
  
-        
-              ############################################################
-	#	MOVIMENTA		                #
-	#	a2: o endereco do vetor a ser movimentado   #
-	#	a1: tamanho do array                        #
-	###########################################################
-move_fantasma_direita:
-	move	$t5, $zero
-	move 	$a3, $ra
 
-	addi	$t3, $t3, -13312
-	jal 	limpa_personagens
-	move	$t5, $zero
-direitaf_loop:
-	add 	$t2, $t5, $a2
-	lw	$t4, ($t2)
-	addi	$t4, $t4, 4
-	sw	$t4, ($t2)
-	addi	$t5, $t5, 4
-	bgt	$t5, $a1, movef_exit
-	#jal	pinta_personagens
-	j	direitaf_loop
-	#bgt	$t4, 0x10010000, acima_loop_ext
-move_fantasma_esquerda:
-	move 	$a3, $ra
-	
-	
-	jal	limpa_personagens
-	move	$t5, $zero
-esquerdaf_loop:
-	add 	$t2, $t5, $a2
-	lw	$t4, ($t2)
-	addi	$t4, $t4, -4
-	sw	$t4, ($t2)
-	addi	$t5, $t5, 4
-	bgt	$t5, $a1, movef_exit
-	#jal	pinta_personagens
-	j esquerdaf_loop
-	#bgt	$t4, 0x10010000, acima_loop_ext
-
-move_fantasma_cima:
-	move 	$a3, $ra
-	
-	jal 	limpa_personagens
-	move	$t5, $zero
-acimaf_loop:
-	add $t2, $t5, $a2
-	lw	$t4, ($t2)#pacman_dir($t5)
-	addi	$t4, $t4, -1024 #decremenat a linha
-	sw	$t4, ($t2)
-	addi	$t5, $t5, 4
-	bgt	$t5, $a1, movef_exit
-	#jal	pinta_personagens
-	j acimaf_loop
-	#bgt	$t4, 0x10010000, acima_loop_ext
-	
-move_fantasma_baixo:
-	move	 $a3, $ra
-	
-	
-	jal	 limpa_personagens
-	move	$t5, $zero
-baixof_loop:
-	add 	$t2, $t5, $a2
-	lw	$t4, ($t2)#pacman_dir($t5)
-	addi	$t4, $t4, 1024
-	sw	$t4, ($t2)
-	addi	$t5, $t5, 4
-	bgt	$t5, $a1, movef_exit
-	#jal	pinta_personagens
-	j	baixof_loop
-	#bgt	$t4, 0x10010000, acima_loop_ext
-movef_exit:
-	jal	pinta_personagens
-
-	jr	$a3  
-	     
 	###########################################
 	#	TRANSICAO DE ESTAGIO	#
 	###########################################
