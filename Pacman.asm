@@ -120,9 +120,11 @@ cor_fantasma_rosa:	.word 0x00fa9893
 direcao_fvermelho:	.word 0
 direcao_flaranja:    .word 0
 direcao_fazul:    .word 0
-direcao_frosa:    .word 0
+direcao_frosa:    .word 3
 
-    
+direcao_pacman:	.word 0
+direcao_pacman_prox:	.word 0
+   
 fantasma_tam: 	.word 628 #158*4  -4 
 pacman_tam: 		.word 440 #111*4  - 4
     
@@ -159,11 +161,48 @@ fase1:
 	jal 	obstaculos_fase1
 	jal 	pinta_pontos_mapa1
 	jal 	mostra_placar
+	
+	
+	la	$a2, fantasma_vermelho
+	lw	$a1, fantasma_tam 
+
+		move_fantasma_direita($a2, $a1,41)
+		move_fantasma_baixo($a2, $a1,38)
+		move_fantasma_direita($a2, $a1,41)
+		move_fantasma_baixo($a2, $a1,33)
+		
+		
 	la	$a2, fantasma_rosa
 	lw	$a1, fantasma_tam 
 		
 		move_fantasma_cima($a2, $a1,17)
 		move_fantasma_direita($a2, $a1,41)
+		move_fantasma_cima($a2, $a1,56)
+		move_fantasma_direita($a2, $a1,40)
+		move_fantasma_cima($a2, $a1,30)
+		
+	la	$a2, fantasma_azul
+	lw	$a1, fantasma_tam 
+	
+		move_fantasma_direita($a2, $a1,17)
+		move_fantasma_cima($a2, $a1,17)
+		move_fantasma_esquerda($a2, $a1,41)
+		move_fantasma_cima($a2, $a1,56)
+		move_fantasma_esquerda($a2, $a1,41)
+		move_fantasma_cima($a2, $a1,32)
+		
+	la	$a2, fantasma_laranja
+	lw	$a1, fantasma_tam 
+	
+		move_fantasma_esquerda($a2, $a1,17)
+		move_fantasma_cima($a2, $a1,17)
+		move_fantasma_esquerda($a2, $a1,41)
+		move_fantasma_baixo($a2, $a1,38)
+		move_fantasma_esquerda($a2, $a1,41)
+		move_fantasma_baixo($a2, $a1,33)
+
+		
+		
 fase1_loop:
 	#jal 	obter_teclado
 	#jal 	direita_prox # faz a moviemtação do pacman
@@ -172,7 +211,7 @@ fase1_loop:
 	#jal	movimenta_fantasma_vermelho
 	#jal	movimenta_fantasma_laranja
 	#jal	movimenta_fantasma_azul
-	#jal	movimenta_fantasma_rosa
+	jal	movimenta_fantasma_rosa
 	
 
 	
@@ -262,55 +301,51 @@ movimenta_fantasma_rosa:
 	addi	$t5, $t5, -20 #pra por na posicao certa da verificacao do caminho
 	addi	$t5, $t5, -1024
 	jal	verifica_traversia
-	beq	$a1, 0, exit_rosa # se não existe a traversia
+	beq	$a1, 0, anda_rosa # se não existe a traversia continua na mesma direcao
     
 loop_random_rosa:   
-    li $v0, 42        #Syscall Random
-    li $a1, 3         # Valor max
-    syscall           # Pegar em a0
+	li	$v0, 42        #Syscall Random
+	li	$a1, 3         # Valor max
+	syscall           # Pegar em a0
     
-    mul $t5, $a0,4
-    lw $t2, array_traversia($t5)
-    beqz $t2, loop_random_rosa
-addi $a0, $a0,1   #Ajeita pra ficar igual ao Array normal
+	mul	$t5, $a0,4
+	lw	$t2, array_traversia($t5)
+	beqz	$t2, loop_random_rosa
+	addi	$a0, $a0,1   #Ajeita pra ficar igual ao Array normal
  
  # para,direit, esq, cima, baixo
+	sw	$a0, direcao_frosa
+anda_rosa:
+	lw	$a0, direcao_frosa
+	
 	beq	$a0, 1, rosa_direita
 	beq	$a0, 2, rosa_esquerda
 	beq	$a0, 3, rosa_cima
 	beq	$a0, 4, rosa_baixo
 	j	exit_rosa
 rosa_direita:
-	li	$t2, 1
-	sw	$t2,direcao_frosa
 	la	$a2, fantasma_rosa
 	lw	$a1, fantasma_tam 
 		move_fantasma_direita($a2, $a1, 1)
 	j	exit_rosa
 rosa_esquerda:  
-	li	$t2, 2
-	sw	$t2,direcao_frosa
 	la	$a2, fantasma_rosa
 	lw	$a1, fantasma_tam 
 		move_fantasma_esquerda($a2, $a1,1)
 	j	exit_rosa
 rosa_cima:  
-	li	$t2, 3
-	sw	$t2,direcao_frosa
 	la	$a2, fantasma_rosa
 	lw	$a1, fantasma_tam 
 		move_fantasma_cima($a2, $a1,1)
 	j	exit_rosa
 rosa_baixo:  
-	li	$t2, 4
-	sw	$t2,direcao_frosa
 	la	$a2, fantasma_rosa
 	lw	$a1, fantasma_tam 
 		move_fantasma_baixo($a2, $a1,1)
 	
 	j	exit_rosa
- 
 exit_rosa:
+
 	jr	$t7
 
 	###########################################
@@ -1393,7 +1428,10 @@ move_exit:
 direita_prox:
 	move	$t7, $ra
 #depois botar pra todos os lados do pacman
-	bne	$v0, 1, esquerda_prox
+	lw	$v0, direcao_pacman
+	lw	$v1, direcao_pacman_prox
+	
+	bne	$v1, 1, esquerda_prox
 	
 	lw 	$t3, pacman_dir + 16 #pega o canto da borda de cima do pacman
 	addi	$t3, $t3, -1004
@@ -1405,9 +1443,12 @@ direita_prox:
 	la	$a2, pacman_dir
 	lw 	$a1, pacman_tam
 	jal	move_direita
+	
+	sw	$v1, direcao_pacman
+	
 	jr	$t7
 esquerda_prox:
-	bne	$v0, 2, cima_prox
+	bne	$v1, 2, cima_prox
 	
 	lw 	$t3, pacman_dir #pega o canto da borda de cima do pacman
 	addi	$t3, $t3, -1052
@@ -1419,6 +1460,9 @@ esquerda_prox:
 	la	$a2, pacman_dir
 	lw 	$a1, pacman_tam
 	jal	move_esquerda
+	
+	sw	$v1, direcao_pacman
+	
 	jr	$t7
 cima_prox:
 	bne	$v1, 3, baixo_prox
@@ -1433,6 +1477,8 @@ cima_prox:
 	la	$a2, pacman_dir
 	lw 	$a1, pacman_tam
 	jal	move_cima
+	
+	sw	$v1, direcao_pacman
 	jr	$t7
 	#j	main_1
 baixo_prox:
@@ -1448,6 +1494,8 @@ baixo_prox:
 	la	$a2, pacman_dir
 	lw 	$a1, pacman_tam
 	jal	move_baixo
+	
+	sw	$v1, direcao_pacman
 	jr	$t7
 	
 	##CONTINUA MOVENDO NA DIRECAO ATUAL	
@@ -1531,9 +1579,11 @@ tecla_direita:
 	addi	$t6, $t6, 13312
 	jal 	verifica_laterais
 	li	$v1, 1
+	sw	$v1, direcao_pacman_prox
 	beq	$a3, 1, tecla_voltar
 	
 	li 	$v0,1
+	sw	$v0, direcao_pacman
 	j 	tecla_voltar
 tecla_esquerda:
 	bne	$t0, 97, tecla_cima
@@ -1544,9 +1594,11 @@ tecla_esquerda:
 	addi	$t6, $t6, 13312
 	jal 	verifica_laterais
 	li	$v1, 2
+	sw	$v1, direcao_pacman_prox
 	beq	$a3, 1, tecla_voltar
 	
 	li 	$v0, 2
+	sw	$v0, direcao_pacman
 	j 	tecla_voltar
 tecla_cima:
 	bne	 $t0, 119, tecla_baixo
@@ -1557,9 +1609,11 @@ tecla_cima:
 	addi	$t6, $t6, 52
 	jal 	verifica_laterais
 	li	$v1, 3
+	sw	$v1, direcao_pacman_prox
 	beq	$a3, 1, tecla_voltar
 	
 	li	 $v0, 3
+	sw	$v0, direcao_pacman
 	j	 tecla_voltar
 tecla_baixo:
 	bne	 $t0, 115, tecla_voltar
@@ -1570,9 +1624,11 @@ tecla_baixo:
 	addi	$t6, $t6, 52
 	jal 	verifica_laterais
 	li	$v1, 4
+	sw	$v1, direcao_pacman_prox
 	beq	$a3, 1, tecla_voltar
 	
 	li	 $v0, 4
+	sw	$v0,direcao_pacman
 	#j tecla_voltar
 tecla_voltar:
 	#li $t0, 0xFFFF0004
