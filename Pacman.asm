@@ -32,14 +32,24 @@ cor_fantasma_azul:	.word 0x0061fafc
 cor_fantasma_laranja:	.word 0x00fc9711
 cor_fantasma_rosa:	.word 0x00fa9893
 
+direcao_fvermelho:	.word 0
+direcao_flaranja:    .word 0
+direcao_fazul:    .word 0
+direcao_frosa:    .word 0
+
+    
 fantasma_tam: 	.word 628 #158*4  -4 
 pacman_tam: 		.word 440 #111*4  - 4
+    
+ 
 pacman_dir: 		.space  444 # 111*4 
 
 fantasma_vermelho:	.space  632 # 111*4
 fantasma_azul: 	.space  632 # 111*4
 fantasma_laranja: 	.space  632 # 111*4
 fantasma_rosa:	.space  632 # 111*4
+
+array_traversia: .space 16
 .text 
 
 .globl main
@@ -48,7 +58,7 @@ main:
 	sw 	$zero, pontuacao #pontuacao do jogo inicial
 	lw 	$t0, bitmap_addr
 	
-	li	$s7, 100
+	li	$s7, 000
 	sw	$s7, pontuacao
 	j	 fase1
 	
@@ -69,9 +79,9 @@ fase1_loop:
 	jal 	direita_prox # faz a moviemtação do pacman
 	
 	#faz a movimentação dos fantasmas
-	jal	movimenta_fantasma_vermelho
-	jal	movimenta_fantasma_laranja
-	jal	movimenta_fantasma_azul
+	#jal	movimenta_fantasma_vermelho
+	#jal	movimenta_fantasma_laranja
+	#jal	movimenta_fantasma_azul
 	jal	movimenta_fantasma_rosa
 	
 	sleep(16)
@@ -104,9 +114,9 @@ fase2_loop:
 	jal 	direita_prox # faz a moviemtação do pacman
 		
 	#faz a movimentação dos fantasmas
-	jal	movimenta_fantasma_vermelho
-	jal	movimenta_fantasma_laranja
-	jal	movimenta_fantasma_azul
+	#jal	movimenta_fantasma_vermelho
+	#jal	movimenta_fantasma_laranja
+	#jal	movimenta_fantasma_azul
 	jal	movimenta_fantasma_rosa
 	
 	sleep(16)
@@ -127,7 +137,15 @@ movimenta_fantasma_vermelho:
 	###########################################
 movimenta_fantasma_laranja:
 	move	$t7, $ra
-	
+    
+	lw	$t1, fantasma_laranja  
+	lw	$a2, direcao_flaranja
+ 	addi	$t3, $t1, -20 #pra por na posicao certa da verificacao do caminho
+	addi	$t3, $t3, -1024
+	jal	verifica_traversia
+	beq	$a1, 0, exit_laranja # se não existe a traversia
+    
+exit_laranja:
 	jr	$t7
 	
 	###########################################
@@ -135,7 +153,33 @@ movimenta_fantasma_laranja:
 	###########################################
 movimenta_fantasma_rosa:
 	move	$t7, $ra
-	
+    
+	lw	$t5, fantasma_rosa  
+	lw	$a2, direcao_frosa
+	addi	$t5, $t5, -20 #pra por na posicao certa da verificacao do caminho
+	addi	$t5, $t5, -1024
+	jal	verifica_traversia
+	beq	$a1, 0, exit_rosa # se não existe a traversia
+    
+loop_random_rosa:   
+    li $v0, 42        #Syscall Random
+    li $a1, 3         # Valor max
+    syscall           # Pegar em a0
+    
+    mul $t5, $a0,4
+    lw $t2, array_traversia($t5)
+    beqz $t2, loop_random_rosa
+addi $a0, $a0,1   #Ajeita pra ficar igual ao Array normal
+ 
+ # para,direit, esq, cima, baixo
+	beq	$a0, 0, rosa_esquerda
+rosa_esquerda:  
+	li	$t2, 2
+	sw	$t2,direcao_frosa
+	move	$a2,$t5
+	lw	$a1, fantasma_tam 
+ 
+exit_rosa:
 	jr	$t7
 
 	###########################################
@@ -143,10 +187,190 @@ movimenta_fantasma_rosa:
 	###########################################
 movimenta_fantasma_azul:
 	move	$t7, $ra
-	
+    
+	lw	$t5, fantasma_azul  
+	addi	$t5, $t5, -20 #pra por na posicao certa da verificacao do caminho
+	addi	$t5, $t5, -1024
+	jal	verifica_traversia
+    
+    
 	jr	$t7	
 	
+    	########################################################
+    	#    VERIFICA SE O FANTASMA TA EM UMA TRAVERSIA        #
+    	#     	0 : DIREITA	(tem valor 1)              #
+    	#     	1 : ESQUERDA   (tem valor 2 )            #
+	#	2 : CIMA        (tem valor 3)            #
+	#	3 : BAIXO        (tem valor 4)           #
+   	 #######################################################
+verifica_traversia:
+	li	$t9, 0
+	move	$t8, $ra
+verifica_traversia_direita:
+    
+	addi	$t3, $t5,52
+	move	$t6, $t3
+	addi	$t6, $t6, 15360
+	jal	verifica_laterais
+	beq	$a3, 1, verifica_traversia_esquerda
+    
+	li	$t2, 1 #quando é possível ir para a direita
+	sw	$t2,array_traversia($t9)
+    
+    
+verifica_traversia_esquerda:
+	addi	$t9, $t9, 4
+	
+    	move	$t3, $t5
+	move	$t6, $t3
+	addi	$t6, $t6, 15360
+	jal 	verifica_laterais
+	beq	$a3, 1, verifica_traversia_cima
+    
+	li	$t2, 1 #quando é possível ir para a esquerda
+	sw	$t2,array_traversia($t9)
 
+
+verifica_traversia_cima:
+	addi	$t9, $t9, 4
+    
+	addi	$t3, $t5,1024
+	move	$t6, $t3
+	addi	$t6, $t6, 52
+	jal	verifica_topos
+	beq	$a3, 1, verifica_traversia_cima
+    
+	li	$t2, 1 #quando é possível ir para a cima
+	sw	$t2,array_traversia($t9)
+    
+    
+verifica_traversia_baixo:
+	addi	$t9, $t9, 4
+
+	addi	$t3, $t5,15360
+	move	$t6, $t3
+	addi	$t6, $t6, 52
+	jal	verifica_topos
+	beq	$a3, 1, verifica_traversia_exit
+    
+	li	$t2, 1 #quando é possível ir para a baixo
+	sw	$t2,array_traversia($t9)
+    
+verifica_traversia_exit:
+	jal	verifica_valor_no_array
+	jr	$t8
+        
+        ########################################################
+        #    VERIFICA SE A DIRECAO QUE O FANTASMA ESTÁ INDO 
+        #    ESTÁ EM UMA POSICAO DE TRAVERSIA DADO OS VALORES
+        #    DO ARRAY
+        #    a3 -> 0 se nao existe traversia
+        #    a3 -> 1 se existe traversia
+        #########################################################
+verifica_valor_no_array:
+	beq	$a2, 0, tem_traversia
+	beq	$a2, 1, verifica_array_topos
+	beq	$a2, 2, verifica_array_topos
+	beq	$a2, 3, verifica_array_laterais
+	beq	$a2, 4, verifica_array_laterais
+verifica_array_topos:
+	lw	$t2, array_traversia + 12
+	beq	$t2, 1, tem_traversia
+        
+	lw	$t2, array_traversia + 8
+	beq	$t2, 1, tem_traversia
+	j	n_tem_traversia
+        
+verifica_array_laterais:
+	lw	$t2, array_traversia + 0
+	beq	$t2, 1, tem_traversia
+        
+	lw	$t2, array_traversia + 4
+	beq	$t2, 1, tem_traversia
+	j	n_tem_traversia
+n_tem_traversia:
+	li	$a3, 0
+	jr	$ra
+tem_traversia:
+	li	$a3, 1
+	jr	$ra
+ 
+        
+                ###########################################################
+	#	MOVIMENTA		                #
+	#	a2: o endereco do vetor a ser movimentado   #
+	#	a1: tamanho do array                        #
+	###########################################################
+move_fantasma_direita:
+	move	$t5, $zero
+	move 	$a3, $ra
+
+	addi	$t3, $t3, -13312
+	jal 	limpa_personagens
+	move	$t5, $zero
+direitaf_loop:
+	add 	$t2, $t5, $a2
+	lw	$t4, ($t2)
+	addi	$t4, $t4, 4
+	sw	$t4, ($t2)
+	addi	$t5, $t5, 4
+	bgt	$t5, $a1, movef_exit
+	#jal	pinta_personagens
+	j	direitaf_loop
+	#bgt	$t4, 0x10010000, acima_loop_ext
+move_fantasma_esquerda:
+	move 	$a3, $ra
+	
+	
+	jal	limpa_personagens
+	move	$t5, $zero
+esquerdaf_loop:
+	add $t2, $t5, $a2
+	lw	$t4, ($t2)#pacman_dir($t5)
+	addi	$t4, $t4, -4
+	sw	$t4, ($t2)
+	addi	$t5, $t5, 4
+	bgt	$t5, $a1, movef_exit
+	#jal	pinta_personagens
+	j esquerdaf_loop
+	#bgt	$t4, 0x10010000, acima_loop_ext
+
+move_fantasma_cima:
+	move 	$a3, $ra
+	
+	jal 	limpa_personagens
+	move	$t5, $zero
+acimaf_loop:
+	add $t2, $t5, $a2
+	lw	$t4, ($t2)#pacman_dir($t5)
+	addi	$t4, $t4, -1024 #decremenat a linha
+	sw	$t4, ($t2)
+	addi	$t5, $t5, 4
+	bgt	$t5, $a1, movef_exit
+	#jal	pinta_personagens
+	j acimaf_loop
+	#bgt	$t4, 0x10010000, acima_loop_ext
+	
+move_fantasma_baixo:
+	move	 $a3, $ra
+	
+	
+	jal	 limpa_personagens
+	move	$t5, $zero
+baixof_loop:
+	add 	$t2, $t5, $a2
+	lw	$t4, ($t2)#pacman_dir($t5)
+	addi	$t4, $t4, 1024
+	sw	$t4, ($t2)
+	addi	$t5, $t5, 4
+	bgt	$t5, $a1, movef_exit
+	#jal	pinta_personagens
+	j	baixof_loop
+	#bgt	$t4, 0x10010000, acima_loop_ext
+movef_exit:
+	jal	pinta_personagens
+
+	jr	$a3       
 	###########################################
 	#	TRANSICAO DE ESTAGIO	#
 	###########################################
@@ -869,7 +1093,7 @@ verifica_topos:
 	beq	$t4, $t1, verifica_exit
 	j	verifica_topos
 verifica_exit:
-	seq	$a3, $t4, $t1 # se existe barreira entao v1 = 1, senao v1 = 0
+	seq	$a3, $t4, $t1 # se existe barreira entao a3 = 1, senao a3 = 0
 	jr	$ra
 	
 
