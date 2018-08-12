@@ -174,10 +174,10 @@ loop_random_rosa:
 addi $a0, $a0,1   #Ajeita pra ficar igual ao Array normal
  
  # para,direit, esq, cima, baixo
-	beq	$a0, 0, rosa_direita
-	beq	$a0, 1, rosa_esquerda
-	beq	$a0, 2, rosa_cima
-	beq	$a0, 3, rosa_baixo
+	beq	$a0, 1, rosa_direita
+	beq	$a0, 2, rosa_esquerda
+	beq	$a0, 3, rosa_cima
+	beq	$a0, 4, rosa_baixo
 	j	exit_rosa
 rosa_direita:
 	li	$t2, 1
