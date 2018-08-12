@@ -75,14 +75,16 @@ fase1:
 	jal 	pinta_pontos_mapa1
 	jal 	mostra_placar
 fase1_loop:
-	jal 	obter_teclado
-	jal 	direita_prox # faz a moviemtação do pacman
+	#jal 	obter_teclado
+	#jal 	direita_prox # faz a moviemtação do pacman
 	
 	#faz a movimentação dos fantasmas
 	#jal	movimenta_fantasma_vermelho
 	#jal	movimenta_fantasma_laranja
 	#jal	movimenta_fantasma_azul
 	jal	movimenta_fantasma_rosa
+
+
 	
 	sleep(16)
 	jal 	verificar_ganho_fase1
@@ -172,12 +174,40 @@ loop_random_rosa:
 addi $a0, $a0,1   #Ajeita pra ficar igual ao Array normal
  
  # para,direit, esq, cima, baixo
-	beq	$a0, 0, rosa_esquerda
+	beq	$a0, 0, rosa_direita
+	beq	$a0, 1, rosa_esquerda
+	beq	$a0, 2, rosa_cima
+	beq	$a0, 3, rosa_baixo
+	j	exit_rosa
+rosa_direita:
+	li	$t2, 1
+	sw	$t2,direcao_frosa
+	la	$a2, fantasma_rosa
+	lw	$a1, fantasma_tam 
+	jal	move_fantasma_direita
+	j	exit_rosa
 rosa_esquerda:  
 	li	$t2, 2
 	sw	$t2,direcao_frosa
-	move	$a2,$t5
+	la	$a2, fantasma_rosa
 	lw	$a1, fantasma_tam 
+	jal	move_fantasma_esquerda
+	j	exit_rosa
+rosa_cima:  
+	li	$t2, 3
+	sw	$t2,direcao_frosa
+	la	$a2, fantasma_rosa
+	lw	$a1, fantasma_tam 
+	jal	move_fantasma_cima
+	j	exit_rosa
+rosa_baixo:  
+	li	$t2, 4
+	sw	$t2,direcao_frosa
+	la	$a2, fantasma_rosa
+	lw	$a1, fantasma_tam 
+	jal	move_fantasma_baixo
+	
+	j	exit_rosa
  
 exit_rosa:
 	jr	$t7
@@ -234,7 +264,7 @@ verifica_traversia_esquerda:
 verifica_traversia_cima:
 	addi	$t9, $t9, 4
     
-	addi	$t3, $t5,1024
+	addi	$t3, $t5,0
 	move	$t6, $t3
 	addi	$t6, $t6, 52
 	jal	verifica_topos
@@ -296,7 +326,7 @@ tem_traversia:
 	jr	$ra
  
         
-                ###########################################################
+              ############################################################
 	#	MOVIMENTA		                #
 	#	a2: o endereco do vetor a ser movimentado   #
 	#	a1: tamanho do array                        #
@@ -325,8 +355,8 @@ move_fantasma_esquerda:
 	jal	limpa_personagens
 	move	$t5, $zero
 esquerdaf_loop:
-	add $t2, $t5, $a2
-	lw	$t4, ($t2)#pacman_dir($t5)
+	add 	$t2, $t5, $a2
+	lw	$t4, ($t2)
 	addi	$t4, $t4, -4
 	sw	$t4, ($t2)
 	addi	$t5, $t5, 4
@@ -370,7 +400,8 @@ baixof_loop:
 movef_exit:
 	jal	pinta_personagens
 
-	jr	$a3       
+	jr	$a3  
+	     
 	###########################################
 	#	TRANSICAO DE ESTAGIO	#
 	###########################################
@@ -2216,35 +2247,37 @@ pinta_personagens:
 	
 	jr	$s7
 limpa_personagens:
+	move	$s7, $ra
 	lw	$t1, cor_preto
 	
 	move	$t2, $zero
 	la	$t8, pacman_dir
 	lw	$t4, pacman_tam
-	j	pinta_personagens_loop
+	jal	pinta_personagens_loop
 #fantasma rosa
 	move	$t2, $zero
 	la	$t8, fantasma_rosa
 	lw	$t4, fantasma_tam
-	j	pinta_personagens_loop
+	jal	pinta_personagens_loop
 #fantasma azul
 	move	$t2, $zero
 	la	$t8, fantasma_azul
 	lw	$t4, fantasma_tam
-	j	pinta_personagens_loop
+	jal	pinta_personagens_loop
 	
 #fantasma laranja
 	move	$t2, $zero
 	la	$t8, fantasma_laranja
 	lw	$t4, fantasma_tam
-	j	pinta_personagens_loop
+	jal	pinta_personagens_loop
 
 #fantasma vermelho
 	move	$t2, $zero
 	la	$t8, fantasma_vermelho
 	lw	$t4, fantasma_tam
-	j	pinta_personagens_loop
+	jal	pinta_personagens_loop
 	
+	jr	$s7
 pinta_personagens_loop:
 
 	add 	$t9, $t2, $t8
