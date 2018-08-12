@@ -37,8 +37,12 @@ direitaf_loop:
 	sw	$t4, ($t2)
 	addi	$t5, $t5, 4
 	ble	$t5, %tam,direitaf_loop
-
+	
+	la	$v0, pontos_mapa1
+	lw	$v1, tam_pontos_mapa1
+	pinta_ponto($v0, $v1)
 	jal	pinta_personagens
+	
 	ble	$a3, %vezes, vezes_andar_direita
 .end_macro
 
@@ -57,7 +61,10 @@ esquerdaf_loop:
 	addi	$t5, $t5, 4
 
 	ble	$t5, %tam,esquerdaf_loop
-
+	
+	la	$v0, pontos_mapa1
+	lw	$v1, tam_pontos_mapa1
+	pinta_ponto($v0, $v1)
 	jal	pinta_personagens
 	ble	$a3, %vezes, vezes_andar_esquerda
 .end_macro
@@ -77,7 +84,10 @@ acimaf_loop:
 	addi	$t5, $t5, 4
 
 	ble	$t5, %tam,acimaf_loop
-
+	
+	la	$v0, pontos_mapa1
+	lw	$v1, tam_pontos_mapa1
+	pinta_ponto($v0, $v1)
 	jal	pinta_personagens
 	ble	$a3, %vezes, vezes_andar_cima
 .end_macro	
@@ -96,9 +106,31 @@ baixof_loop:
 	sw	$t4, ($t2)
 	addi	$t5, $t5, 4
 	ble	$t5, %tam,baixof_loop
-
+	
+	la	$v0, pontos_mapa1
+	lw	$v1, tam_pontos_mapa1
+	pinta_ponto($v0, $v1)
 	jal	pinta_personagens
 	ble	$a3, %vezes, vezes_andar_baixo
+.end_macro
+
+.macro pinta_ponto(%vetor, %tam)
+	move	$t9, $zero
+ler_array:
+	add	$t8, %vetor, $t9
+	addi	$t9, $t9, 4
+	lw	$t3,($t8) 
+	
+	beqz	$t3, ler_array
+	move	$t6, $t3
+	addi	$t6, $t6, 8
+	move	$t5, $t6
+	addi	$t5, $t5, 2048 # 2*1024
+	lw	$t1, cor_ponto
+	jal 	pinta_retangulo
+	
+	blt	$t9, %tam, ler_array
+
 .end_macro
 
 .kdata
@@ -127,14 +159,18 @@ direcao_pacman_prox:	.word 0
    
 fantasma_tam: 	.word 628 #158*4  -4 
 pacman_tam: 		.word 440 #111*4  - 4
-    
- 
+tam_pontos_mapa1:	.word  396 #100*4  -4   
+tam_pontos_mapa2:	.word  396 #100*4  -4
+
 pacman_dir: 		.space  444 # 111*4 
 
 fantasma_vermelho:	.space  632 # 111*4
 fantasma_azul: 	.space  632 # 111*4
 fantasma_laranja: 	.space  632 # 111*4
 fantasma_rosa:	.space  632 # 111*4
+
+pontos_mapa1:		.space 400 #100*4
+pontos_mapa2:		.space 400 #100*4
 
 array_traversia: .space 16
 .text 
@@ -817,6 +853,9 @@ pinta_pontos_mapa1:
 	#pontos retangulo esquerdo topo
 	move 	$t7, $ra
 	
+	la	$t8, pontos_mapa1
+	move	$v0, $zero
+	
 	li 	$t3, 74928 #canto topo esquerdo do retangulo
 	li	$s2, 8
 	move	$t9, $zero
@@ -960,13 +999,17 @@ pinta_pontos_mapa1:
 	li	$s2, 2
 	move	$t9, $zero
 	jal	pontos_horizontal
-		
+	
+	sw	$v0, tam_pontos_mapa1
+			
 	jr $t7
 	
 pinta_pontos_mapa2:
 	
 	#pontos retangulo esquerdo topo
 	move 	$t7, $ra
+	la	$t8, pontos_mapa2
+	move	$v0, $zero
 	
 	li 	$t3, 74928 #canto topo esquerdo do retangulo
 	li	$s2, 8
@@ -1122,6 +1165,7 @@ pinta_pontos_mapa2:
 	move	$t9, $zero
 	jal	pontos_horizontal
 	
+	sw	$v0, tam_pontos_mapa2
 	jr $t7
 	
 pontos_horizontal:
@@ -1131,6 +1175,9 @@ pontos_horizontal_loop:
 	addi	$t9, $t9, 1 #incrementa contador
 	bgt	$t9,$s2,pontos_exit
 	
+	add	$v1, $v0, $t8
+	sw	$t3, ($v1) #salva a posição do ponto no array
+	
 	move	$t6, $t3
 	addi	$t6, $t6, 8
 	move	$t5, $t6
@@ -1138,6 +1185,7 @@ pontos_horizontal_loop:
 	lw	$t1, cor_ponto
 	jal 	pinta_retangulo
 	
+	addi	$v0,$v0,4
 	addi	$t3, $t3, -2048 # seta pro topo direito do ponto
 	addi	$t3, $t3, 28 #prox ponto em 28 pixeis
 	j	pontos_horizontal_loop
@@ -1147,6 +1195,9 @@ pontos_vertical_loop:
 	addi	$t9, $t9, 1 #incrementa contador
 	bgt	$t9,$s2,pontos_exit
 	
+	add	$v1, $v0, $t8
+	sw	$t3, ($v1) #salva a posição do ponto no array
+	
 	move	$t6, $t3
 	addi	$t6, $t6, 8
 	move	$t5, $t6
@@ -1154,6 +1205,7 @@ pontos_vertical_loop:
 	lw	$t1, cor_ponto
 	jal 	pinta_retangulo
 	
+	addi	$v0,$v0,4
 	addi	$t3, $t3, -12 # seta pro topo direito do ponto
 	addi	$t3, $t3, 10240#prox ponto em 28 pixeis
 	j	pontos_vertical_loop
