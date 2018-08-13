@@ -282,6 +282,8 @@ main:
 	
 	li	$s7, 000
 	sw	$s7, pontuacao
+	
+	jal	desenha_vidas
 	j	 fase1
 	
 	#############################
@@ -303,7 +305,11 @@ reinicia_fase1:
 	la	$v0, pontos_mapa1
 	lw	$v1, tam_pontos_mapa1
 	pinta_ponto($v0, $v1)
-		
+	
+	jal	desenha_vidas
+	sw	$v0,direcao_pacman
+	sw	$v0,direcao_pacman_prox
+	sw	$v0, 0xFFFF0004
 fase1_loop:
 	jal 	obter_teclado
 	
@@ -342,7 +348,8 @@ reinicia_fase2:
 	sw	$s1, nivel
 	
 	li	$v0, 0	#deixa o pacman parado no inicio da fase
-	move	$v1, $v0
+	sw	$v0,direcao_pacman
+	sw	$v0,direcao_pacman_prox
 	sw	$v0, 0xFFFF0004
 	#jal	transicao_estagio
 	jal	pintar_tela
@@ -354,7 +361,8 @@ reinicia_fase2:
 	jal 	obstaculos_fase2
 	#jal 	pinta_pontos_mapa2
 	jal 	mostra_placar
-
+	
+	jal	desenha_vidas
 	la	$v0, pontos_mapa2
 	lw	$v1, tam_pontos_mapa2
 	pinta_ponto($v0, $v1)
@@ -1847,71 +1855,111 @@ personagens_mapa1:
 	la	$t8, pacman_dir
 	li	$t2, 0
 	
+	li	$s6,237048 #endereco do pixel esquerdo do topo
 	
-	li	$t3, 237048
-	li	$t6, 237064
-	li	$t5, 237064
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,16
+	move	$t5, $t6
+	jal	addr_retangulo 
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-8
+	addi	$t3,$t3,1024
+	move	$t6, $t3
+	addi	$t6, $t6,32
+	move	$t5, $t6
 	jal	addr_retangulo
 	
-	li	$t3, 238064
-	li	$t6, 238096
-	li	$t5, 238096
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,2048
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
 	jal	addr_retangulo
 	
-	li	$t3, 239084
-	li	$t6, 239124
-	li	$t5, 239124
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,3072
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
+	jal	addr_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,4096
+	move	$t6, $t3
+	addi	$t6, $t6,36
+	move	$t5, $t6
 	jal	addr_retangulo
 		
-	li	$t3, 240108
-	li	$t6, 240148
-	li	$t5, 240148
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,5120
+	move	$t6, $t3
+	addi	$t6, $t6,24
+	move	$t5, $t6
 	jal	addr_retangulo
 	
-	li	$t3, 241128
-	li	$t6, 241164
-	li	$t5, 241164
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,6144
+	move	$t6, $t3
+	addi	$t6, $t6,16
+	move	$t5, $t6
 	jal	addr_retangulo
 	
-	li	$t3, 242152
-	li	$t6, 242180
-	li	$t5, 242180
-	jal	addr_retangulo
-	
-	li	$t3, 243176
-	li	$t6, 243192
-	li	$t5, 243192
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,7168
+	move	$t6, $t3
+	addi	$t6, $t6,24
+	move	$t5, $t6
 	jal	addr_retangulo
 		
-	li	$t3, 244200
-	li	$t6, 244224
-	li	$t5, 244224
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,8192
+	move	$t6, $t3
+	addi	$t6, $t6,36
+	move	$t5, $t6
 	jal	addr_retangulo
 	
-	li	$t3, 245224
-	li	$t6, 245260
-	li	$t5, 245260
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,9216
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
 	jal	addr_retangulo
 	
 
-	li	$t3, 246252
-	li	$t6, 246292
-	li	$t5, 246292
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,10240
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
 	jal	addr_retangulo
 	
-	li	$t3, 247276
-	li	$t6, 247316
-	li	$t5, 247316
+	move	$t3, $s6
+	addi	$t3,$t3,-8
+	addi	$t3,$t3,11264
+	move	$t6, $t3
+	addi	$t6, $t6,32
+	move	$t5, $t6
 	jal	addr_retangulo
 		
-	li	$t3, 248304
-	li	$t6, 248336
-	li	$t5, 248336
-	jal	addr_retangulo
-	
-	li	$t3, 249336
-	li	$t6, 249352
-	li	$t5, 249352
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	addi	$t3,$t3,12288
+	move	$t6, $t3
+	addi	$t6, $t6,16
+	move	$t5, $t6
 	jal	addr_retangulo
 	
 
@@ -3429,6 +3477,400 @@ escreve_fase2:
 	jal 	pinta_retangulo
 	
 	jr	$t7
+	
+	###########################################
+	#	DESENHA VIDAS 	#
+	###########################################
+desenha_vidas:
+	move	$t7, $ra
+	lw	$s1, vidas
+
+vida1:
+	li	$s6,66648 #endereco do pixel esquerdo do topo
+	addi	$s6,$s6, 840
+	blt	$s1, 1, pinta_preto_vida
+
+	
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,16
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-8
+	addi	$t3,$t3,1024
+	move	$t6, $t3
+	addi	$t6, $t6,32
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,2048
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,3072
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,4096
+	move	$t6, $t3
+	addi	$t6, $t6,36
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+		
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,5120
+	move	$t6, $t3
+	addi	$t6, $t6,24
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,6144
+	move	$t6, $t3
+	addi	$t6, $t6,16
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,7168
+	move	$t6, $t3
+	addi	$t6, $t6,24
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+		
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,8192
+	move	$t6, $t3
+	addi	$t6, $t6,36
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,9216
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,10240
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-8
+	addi	$t3,$t3,11264
+	move	$t6, $t3
+	addi	$t6, $t6,32
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+		
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	addi	$t3,$t3,12288
+	move	$t6, $t3
+	addi	$t6, $t6,16
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+vida2:
+	addi	$s6,$s6, 20480 #endereco do pixel esquerdo do topo
+	blt	$s1, 2, pinta_preto_vida
+	
+
+	
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,16
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-8
+	addi	$t3,$t3,1024
+	move	$t6, $t3
+	addi	$t6, $t6,32
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,2048
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,3072
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,4096
+	move	$t6, $t3
+	addi	$t6, $t6,36
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+		
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,5120
+	move	$t6, $t3
+	addi	$t6, $t6,24
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,6144
+	move	$t6, $t3
+	addi	$t6, $t6,16
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,7168
+	move	$t6, $t3
+	addi	$t6, $t6,24
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+		
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,8192
+	move	$t6, $t3
+	addi	$t6, $t6,36
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,9216
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,10240
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-8
+	addi	$t3,$t3,11264
+	move	$t6, $t3
+	addi	$t6, $t6,32
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+		
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	addi	$t3,$t3,12288
+	move	$t6, $t3
+	addi	$t6, $t6,16
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+
+vida3:
+	addi	$s6,$s6, 20480 #endereco do pixel esquerdo do topo
+	blt	$s1, 3, pinta_preto_vida
+	
+
+	
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,16
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-8
+	addi	$t3,$t3,1024
+	move	$t6, $t3
+	addi	$t6, $t6,32
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,2048
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,3072
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,4096
+	move	$t6, $t3
+	addi	$t6, $t6,36
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+		
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,5120
+	move	$t6, $t3
+	addi	$t6, $t6,24
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,6144
+	move	$t6, $t3
+	addi	$t6, $t6,16
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,7168
+	move	$t6, $t3
+	addi	$t6, $t6,24
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+		
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,8192
+	move	$t6, $t3
+	addi	$t6, $t6,36
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,9216
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+
+	move	$t3, $s6
+	addi	$t3,$t3,-12
+	addi	$t3,$t3,10240
+	move	$t6, $t3
+	addi	$t6, $t6,40
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	move	$t3, $s6
+	addi	$t3,$t3,-8
+	addi	$t3,$t3,11264
+	move	$t6, $t3
+	addi	$t6, $t6,32
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+		
+	move	$t3, $s6
+	addi	$t3,$t3,0
+	addi	$t3,$t3,12288
+	move	$t6, $t3
+	addi	$t6, $t6,16
+	move	$t5, $t6
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	j	exit_pinta_vida	
+pinta_preto_vida:
+	move	$t3, $s6
+	addi	$t3,$t3,-16
+	addi	$t3,$t3,0
+	move	$t6, $t3
+	addi	$t6, $t6,44
+	addi	$t5, $t6,12288
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo	
+	
+	j	exit_pinta_vida
+	
+exit_pinta_vida:
+	jr	$t7
 	##################################################
 	#	QUANDO O JOGADOR GANHA O JOGO
 	#################################################
@@ -3439,6 +3881,7 @@ venceu:
 	#	QUANDO O JOGADOR morre 
 	#################################################
 morreu:
+	jal desenha_vidas
 	j	exit
 	###########################################
 	#	SAI DO JOGO		#
