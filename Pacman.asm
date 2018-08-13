@@ -282,7 +282,7 @@ main:
 	
 	li	$s7, 000
 	sw	$s7, pontuacao
-	
+	j venceu
 	jal	desenha_vidas
 	j	 fase1
 	
@@ -3871,10 +3871,413 @@ pinta_preto_vida:
 	
 exit_pinta_vida:
 	jr	$t7
+	
+	###########################################
+	#	ESCREVE "AZIZ PASSA NOS"	#
+	###########################################
+aziz_passa_nos:
+
+	move	$t7, $ra
+	
+	li	$s6, 6460
+	addi	$s6, $s6, 20480
+	#LETRA A
+	addi 	$t3, $s6, 1024 #canto topo esquerdo do retangulo
+	addi 	$t6,$t3,72 #canto topo direito do retangulo
+	addi	$t5,$t6, 23552 #canto inferior direito do retangulo
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	addi	$t3, $s6, 28
+	addi 	$t3,$t3, 7168 #canto topo esquerdo do retangulo
+	addi 	$t6, $t3,24  #canto topo direito do retangulo
+	addi	 $t5, $t6,3072 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	
+	addi 	$t3, $s6, 32 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 17408
+	addi 	$t6, $t3, 16 #canto topo direito do retangulo
+	addi	$t5,$t6 7168 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	#LETRA Z
+	addi 	$s6, $s6, 84 
+	
+	addi 	$t3, $s6, 1024 #canto topo esquerdo do retangulo
+	addi 	$t6,$t3,84 #canto topo direito do retangulo
+	addi	$t5,$t6, 23552 #canto inferior direito do retangulo
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	addi	$t3, $s6, 0
+	addi 	$t3,$t3, 7168 #canto topo esquerdo do retangulo
+	addi 	$t6, $t3,8  #canto topo direito do retangulo
+	addi	 $t5, $t6,11264 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	
+	addi 	$t3, $s6, 12 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 7168
+	addi 	$t6, $t3, 16#canto topo direito do retangulo
+	addi	$t5,$t6 7168 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6, 28 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 7168
+	addi 	$t6, $t3, 16#canto topo direito do retangulo
+	addi	$t5,$t6 3072 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+
+	
+	##
+	addi	$t3, $s6, 76
+	addi 	$t3,$t3, 7168 #canto topo esquerdo do retangulo
+	addi 	$t6, $t3,12  #canto topo direito do retangulo
+	addi	 $t5, $t6,11264 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	
+	addi 	$t3, $s6, 60 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 9216
+	addi 	$t6, $t3, 20 #canto topo direito do retangulo
+	addi	$t5,$t6 9216 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6, 48 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 12288
+	addi 	$t6, $t3, 12#canto topo direito do retangulo
+	addi	$t5,$t6 6144 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6, 36 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 15360
+	addi 	$t6, $t3, 12#canto topo direito do retangulo
+	addi	$t5,$t6 3072 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	##
+	#LETRA I
+	addi 	$s6, $s6, 96 #canto topo esquerdo do retangulo
+	
+	addi 	$t3, $s6, 1024 #canto topo esquerdo do retangulo
+	addi 	$t6,$t3,25 #canto topo direito do retangulo
+	addi	$t5,$t6, 23552 #canto inferior direito do retangulo
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	addi	$t3, $s6, 0
+	addi 	$t3,$t3, 5120 #canto topo esquerdo do retangulo
+	addi 	$t6, $t3,25  #canto topo direito do retangulo
+	addi	 $t5, $t6,3072 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	#LETRA Z
+	addi 	$s6, $s6, 36 
+	
+	addi 	$t3, $s6, 1024 #canto topo esquerdo do retangulo
+	addi 	$t6,$t3,84 #canto topo direito do retangulo
+	addi	$t5,$t6, 23552 #canto inferior direito do retangulo
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	addi	$t3, $s6, 0
+	addi 	$t3,$t3, 7168 #canto topo esquerdo do retangulo
+	addi 	$t6, $t3,8  #canto topo direito do retangulo
+	addi	 $t5, $t6,11264 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	
+	addi 	$t3, $s6, 12 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 7168
+	addi 	$t6, $t3, 16#canto topo direito do retangulo
+	addi	$t5,$t6 7168 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6, 28 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 7168
+	addi 	$t6, $t3, 16#canto topo direito do retangulo
+	addi	$t5,$t6 3072 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+
+	
+	##
+	addi	$t3, $s6, 76
+	addi 	$t3,$t3, 7168 #canto topo esquerdo do retangulo
+	addi 	$t6, $t3,12  #canto topo direito do retangulo
+	addi	 $t5, $t6,11264 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	
+	addi 	$t3, $s6, 60 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 9216
+	addi 	$t6, $t3, 20 #canto topo direito do retangulo
+	addi	$t5,$t6 9216 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6, 48 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 12288
+	addi 	$t6, $t3, 12#canto topo direito do retangulo
+	addi	$t5,$t6 6144 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6, 36 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 15360
+	addi 	$t6, $t3, 12#canto topo direito do retangulo
+	addi	$t5,$t6 3072 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	##
+	
+	#li	$s6, 6380
+	#LETRA P
+	addi 	$s6, $s6, -216 #canto topo esquerdo do retangulo
+	addi 	$s6, $s6, -52
+	addi	$s6, $s6, 27648
+	
+	addi 	$t3, $s6, 0 #canto topo esquerdo do retangulo
+	addi 	$t6,$t3,72 #canto topo direito do retangulo
+	addi	$t5,$t6, 23552 #canto inferior direito do retangulo
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	addi	$t3, $s6, 28
+	addi 	$t3,$t3, 5120 #canto topo esquerdo do retangulo
+	addi 	$t6, $t3,20  #canto topo direito do retangulo
+	addi	 $t5, $t6,3072 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	
+	addi 	$t3, $s6, 32 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 14336
+	addi 	$t6, $t3, 40 #canto topo direito do retangulo
+	addi	$t5,$t6 10240 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	###LETRA A#
+	addi	$s6, $s6, 84
+	addi 	$t3, $s6, 1024 #canto topo esquerdo do retangulo
+	addi 	$t6,$t3,72 #canto topo direito do retangulo
+	addi	$t5,$t6, 23552 #canto inferior direito do retangulo
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	addi	$t3, $s6, 28
+	addi 	$t3,$t3, 7168 #canto topo esquerdo do retangulo
+	addi 	$t6, $t3,24  #canto topo direito do retangulo
+	addi	 $t5, $t6,3072 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	
+	addi 	$t3, $s6, 32 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 17408
+	addi 	$t6, $t3, 16 #canto topo direito do retangulo
+	addi	$t5,$t6 7168 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	#LETRA S
+	addi	$s6, $s6, 84
+	addi 	$t3, $s6, 1024 #canto topo esquerdo do retangulo
+	addi 	$t6,$t3,72 #canto topo direito do retangulo
+	addi	$t5,$t6, 23552 #canto inferior direito do retangulo
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	addi	$t3, $s6, 16
+	addi 	$t3,$t3, 5120 #canto topo esquerdo do retangulo
+	addi 	$t6, $t3,60  #canto topo direito do retangulo
+	addi	 $t5, $t6,4096 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	
+	addi 	$t3, $s6, 14336 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 0
+	addi 	$t6, $t3, 40 #canto topo direito do retangulo
+	addi	$t5,$t6 5120 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	#LETRA S
+	addi	$s6, $s6, 84
+	addi 	$t3, $s6, 1024 #canto topo esquerdo do retangulo
+	addi 	$t6,$t3,72 #canto topo direito do retangulo
+	addi	$t5,$t6, 23552 #canto inferior direito do retangulo
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	addi	$t3, $s6, 16
+	addi 	$t3,$t3, 5120 #canto topo esquerdo do retangulo
+	addi 	$t6, $t3,60  #canto topo direito do retangulo
+	addi	 $t5, $t6,4096 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	
+	addi 	$t3, $s6, 14336 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 0
+	addi 	$t6, $t3, 48 #canto topo direito do retangulo
+	addi	$t5,$t6 5120 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	###LETRA A#
+	addi	$s6, $s6, 84
+	addi 	$t3, $s6, 1024 #canto topo esquerdo do retangulo
+	addi 	$t6,$t3,72 #canto topo direito do retangulo
+	addi	$t5,$t6, 23552 #canto inferior direito do retangulo
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	addi	$t3, $s6, 28
+	addi 	$t3,$t3, 7168 #canto topo esquerdo do retangulo
+	addi 	$t6, $t3,24  #canto topo direito do retangulo
+	addi	 $t5, $t6,3072 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	
+	addi 	$t3, $s6, 32 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 17408
+	addi 	$t6, $t3, 16 #canto topo direito do retangulo
+	addi	$t5,$t6 7168 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	#LETRA N
+	addi	$s6, $s6, -336
+	addi	$s6, $s6, 80
+	addi	$s6, $s6, 27648
+	
+	addi 	$t3, $s6, 1024 #canto topo esquerdo do retangulo
+	addi 	$t6,$t3,84 #canto topo direito do retangulo
+	addi	$t5,$t6, 23552 #canto inferior direito do retangulo
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	addi	$t3, $s6, 24
+	addi 	$t3,$t3, 0 #canto topo esquerdo do retangulo
+	addi 	$t6, $t3,36  #canto topo direito do retangulo
+	addi	 $t5, $t6,1024 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	
+	addi 	$t3, $s6, 36 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 2048
+	addi 	$t6, $t3, 24#canto topo direito do retangulo
+	addi	$t5,$t6 2048 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6, 44 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 5120
+	addi 	$t6, $t3, 16#canto topo direito do retangulo
+	addi	$t5,$t6 2048 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6, 52 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 6144
+	addi 	$t6, $t3, 8#canto topo direito do retangulo
+	addi	$t5,$t6 4096 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	##
+	addi	$t3, $s6, 20
+	addi 	$t3,$t3, 20480 #canto topo esquerdo do retangulo
+	addi 	$t6, $t3,40  #canto topo direito do retangulo
+	addi	 $t5, $t6,4096 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	
+	addi 	$t3, $s6, 20 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 15360
+	addi 	$t6, $t3, 28#canto topo direito do retangulo
+	addi	$t5,$t6 4096 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6, 20 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 12288
+	addi 	$t6, $t3, 20#canto topo direito do retangulo
+	addi	$t5,$t6 2048 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	addi 	$t3, $s6, 20 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 9216
+	addi 	$t6, $t3, 8#canto topo direito do retangulo
+	addi	$t5,$t6 2048 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	##
+	
+	#LETRA 0
+	addi	$s6, $s6, 96
+	addi 	$t3, $s6, 1024 #canto topo esquerdo do retangulo
+	addi 	$t6,$t3,72 #canto topo direito do retangulo
+	addi	$t5,$t6, 23552 #canto inferior direito do retangulo
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	addi	$t3, $s6, 28
+	addi 	$t3,$t3, 7168 #canto topo esquerdo do retangulo
+	addi 	$t6, $t3,24  #canto topo direito do retangulo
+	addi	 $t5, $t6,11264 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	#LETRA S
+	addi	$s6, $s6, 84
+	addi 	$t3, $s6, 1024 #canto topo esquerdo do retangulo
+	addi 	$t6,$t3,72 #canto topo direito do retangulo
+	addi	$t5,$t6, 23552 #canto inferior direito do retangulo
+	lw 	$t1, cor_pacman
+	jal 	pinta_retangulo
+	
+	addi	$t3, $s6, 16
+	addi 	$t3,$t3, 5120 #canto topo esquerdo do retangulo
+	addi 	$t6, $t3,60  #canto topo direito do retangulo
+	addi	 $t5, $t6,4096 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	
+	addi 	$t3, $s6, 14336 #canto topo esquerdo do retangulo
+	addi	$t3, $t3, 0
+	addi 	$t6, $t3, 48 #canto topo direito do retangulo
+	addi	$t5,$t6 5120 #canto inferior direito do retangulo
+	lw 	$t1, cor_preto
+	jal 	pinta_retangulo
+	
+	jr	$t7	
+	
 	##################################################
 	#	QUANDO O JOGADOR GANHA O JOGO
 	#################################################
 venceu:
+	jal aziz_passa_nos
 	j	exit
 	
 	##################################################
