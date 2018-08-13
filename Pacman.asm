@@ -145,6 +145,90 @@ ler_array:
 sair_tirar_ponto:
 .end_macro
 
+.macro verifica_lateral(%topo, %baixo, %cor1, %cor2, %cor3, %cor4)
+laterais:
+##MODIFICAR
+	bgt	%topo, %baixo, exit_lateral #verifica se já é o ultimo endereco
+	lw 	$t4, (%topo) 
+	addi 	%topo, %topo, 1024 #incrementa t3
+	
+	seq	$a3, $t4, %cor1 # se existe barreira entao a3 = 1, senao a3 = 0
+	bnez	$a3, exit_lateral
+	seq	$a3, $t4, %cor2
+	bnez	$a3, exit_lateral
+	seq	$a3, $t4, %cor3
+	bnez	$a3, exit_lateral
+	seq	$a3, $t4, %cor4
+	bnez	$a3, exit_lateral
+	j 	laterais
+exit_lateral:
+
+.end_macro
+	
+.macro verifica_topo(%esq, %dir, %cor1, %cor2, %cor3, %cor4)
+topos:
+	bgt	%esq, %dir, exit_topo #verifica se já é o ultimo endereco
+	lw	$t4, (%esq) 
+	addi	%esq, %esq, 4 #incrementa t3
+	
+	seq	$a3, $t4, %cor1 # se existe barreira entao a3 = 1, senao a3 = 0
+	bnez	$a3, exit_topo
+	seq	$a3, $t4, %cor2
+	bnez	$a3, exit_topo
+	seq	$a3, $t4, %cor3
+	bnez	$a3, exit_topo
+	seq	$a3, $t4, %cor4
+	bnez	$a3, exit_topo
+	j	topos
+exit_topo:
+
+.end_macro
+
+
+.macro verifica_morte()
+	##########################################################
+	#	VERIFICA SE MORREU		 #
+	##########################################################
+	lw	$s1, cor_fantasma_vermelho
+	lw	$s2, cor_fantasma_azul
+	lw	$s3, cor_fantasma_laranja
+	lw	$s4, cor_fantasma_rosa
+	
+	lw	$t3, pacman_dir
+	addi	$t3, $t3,-16
+	addi	$t5, $t3, 44
+	verifica_topo($t3, $t5, $s1, $s2, $s3, $s4)
+	bnez	$a3, exit_morte
+	
+	lw	$t3, pacman_dir
+	addi	$t3, $t3,-16
+	addi	$t3, $t3, 12288
+	addi	$t5, $t3, 44
+	verifica_topo($t3, $t5, $s1,$s2, $s3, $s4)
+	bnez	$a3, exit_morte
+	
+	lw	$t3, pacman_dir
+	addi	$t3, $t3,-16
+	addi	$t5, $t3, 12288
+	verifica_lateral($t3, $t5,$s1, $s2, $s3, $s4)
+	bnez	$a3, exit_morte
+
+	lw	$t3, pacman_dir
+	addi	$t3, $t3,-16
+	addi	$t3, $t3, 44
+	addi	$t5, $t3, 12288
+	verifica_lateral($t3, $t5,$s1, $s2, $s3, $s4)
+	bnez	$a3, exit_morte
+exit_morte:
+	beqz	$a3, n_morreu
+	lw	$t1, vidas
+	addi	$t1, $t1, -1
+	sw	$t1, vidas
+	
+	beqz	$t1, morreu #se a qtd de vi
+n_morreu:			
+.end_macro
+
 .kdata
 pontuacao:		.word 0
 bitmap_size:		.word 65536 # 256*256
@@ -162,9 +246,9 @@ cor_fantasma_laranja:	.word 0x00fc9711
 cor_fantasma_rosa:	.word 0x00fa9893
 
 direcao_fvermelho:	.word 0
-direcao_flaranja:    .word 0
-direcao_fazul:    .word 0
-direcao_frosa:    .word 3
+direcao_flaranja:    	.word 0
+direcao_fazul:    	.word 0
+direcao_frosa:    	.word 3
 
 direcao_pacman:	.word 0
 direcao_pacman_prox:	.word 0
@@ -175,6 +259,7 @@ tam_pontos_mapa1:	.word  396 #100*4  -4
 tam_pontos_mapa2:	.word  396 #100*4  -4
 
 nivel:		.word 1
+vidas:		.word 3
 
 pacman_dir: 		.space  444 # 111*4 
 
@@ -182,7 +267,7 @@ fantasma_vermelho:	.space  632 # 111*4
 fantasma_azul: 	.space  632 # 111*4
 fantasma_laranja: 	.space  632 # 111*4
 fantasma_rosa:	.space  632 # 111*4
-array_traversia: .space 16
+array_traversia:	.space 16
 pontos_mapa1:		.space 400 #100*4
 pontos_mapa2:		.space 400 #100*4
 
@@ -195,7 +280,7 @@ main:
 	sw 	$zero, pontuacao #pontuacao do jogo inicial
 	lw 	$t0, bitmap_addr
 	
-	li	$s7, 100
+	li	$s7, 000
 	sw	$s7, pontuacao
 	j	 fase1
 	
@@ -203,17 +288,21 @@ main:
 	#	FASE 1	#
 	#############################
 fase1:
+	jal 	pinta_pontos_mapa1
+reinicia_fase1:
+	jal	pintar_tela
 	jal 	escreve_titulo
 	jal	escreve_fase1
 	jal 	pinta_borda
 	jal 	cria_personagens
 	jal 	pinta_personagens
 	jal 	obstaculos_fase1
-	jal 	pinta_pontos_mapa1
+	#jal 	pinta_pontos_mapa1
 	jal 	mostra_placar
 	
-	
-
+	la	$v0, pontos_mapa1
+	lw	$v1, tam_pontos_mapa1
+	pinta_ponto($v0, $v1)
 		
 fase1_loop:
 	jal 	obter_teclado
@@ -233,6 +322,9 @@ fase1_loop:
 	pinta_ponto($v0, $v1)
 
 	jal	pinta_personagens
+	verifica_morte()
+	bnez	$a3, reinicia_fase1
+	
 	sleep(16)
 	jal 	verificar_ganho_fase1
 	j	fase1_loop
@@ -241,6 +333,8 @@ fase1_loop:
 	#	FASE 2	#
 	#############################
 fase2:
+	jal 	pinta_pontos_mapa2
+reinicia_fase2:
 	li 	$s7, 0x0001ff00 #muda a cor do labirinto
 	sw 	$s7, cor_lab_parede
 	
@@ -258,9 +352,12 @@ fase2:
 	jal 	cria_personagens
 	jal 	pinta_personagens
 	jal 	obstaculos_fase2
-	jal 	pinta_pontos_mapa2
+	#jal 	pinta_pontos_mapa2
 	jal 	mostra_placar
-	
+
+	la	$v0, pontos_mapa2
+	lw	$v1, tam_pontos_mapa2
+	pinta_ponto($v0, $v1)
 fase2_loop:
 	jal 	obter_teclado
 	
@@ -277,6 +374,8 @@ fase2_loop:
 	lw	$v1, tam_pontos_mapa2
 	pinta_ponto($v0, $v1)
 	jal	pinta_personagens
+	verifica_morte()
+	bnez	$a3, reinicia_fase2
 	sleep(16)
 	
 	
@@ -1214,7 +1313,6 @@ pontos_exit:
 #t6 - > pixel mais baixo
 verifica_laterais:
 ##MODIFICAR
-
 	bgt	$t3, $t6, verifica_exit #verifica se já é o ultimo endereco
 	lw 	$t4, ($t3) 
 	addi 	$t3, $t3, 1024 #incrementa t3
@@ -3335,6 +3433,12 @@ escreve_fase2:
 	#	QUANDO O JOGADOR GANHA O JOGO
 	#################################################
 venceu:
+	j	exit
+	
+	##################################################
+	#	QUANDO O JOGADOR morre 
+	#################################################
+morreu:
 	j	exit
 	###########################################
 	#	SAI DO JOGO		#
