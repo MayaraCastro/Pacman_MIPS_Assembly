@@ -27,8 +27,8 @@
 	li	$a3, 0
 vezes_andar_direita:
 	addi	$a3, $a3, 1
-	sleep(16)
-	jal 	limpa_personagens
+	#sleep(16)
+	
 	move	$t5, $zero
 direitaf_loop:
 	add 	$t2, $t5, %vetor
@@ -38,10 +38,7 @@ direitaf_loop:
 	addi	$t5, $t5, 4
 	ble	$t5, %tam,direitaf_loop
 	
-	la	$v0, pontos_mapa1
-	lw	$v1, tam_pontos_mapa1
-	pinta_ponto($v0, $v1)
-	jal	pinta_personagens
+	
 	
 	ble	$a3, %vezes, vezes_andar_direita
 .end_macro
@@ -50,8 +47,8 @@ direitaf_loop:
 	li	$a3, 0
 vezes_andar_esquerda:
 	addi	$a3, $a3, 1
-	sleep(16)
-	jal	limpa_personagens
+	#sleep(16)
+	#jal	limpa_personagens
 	move	$t5, $zero
 esquerdaf_loop:
 	add 	$t2, $t5, %vetor
@@ -62,10 +59,10 @@ esquerdaf_loop:
 
 	ble	$t5, %tam,esquerdaf_loop
 	
-	la	$v0, pontos_mapa1
-	lw	$v1, tam_pontos_mapa1
-	pinta_ponto($v0, $v1)
-	jal	pinta_personagens
+	#la	$v0, pontos_mapa1
+	#lw	$v1, tam_pontos_mapa1
+	#pinta_ponto($v0, $v1)
+	#jal	pinta_personagens
 	ble	$a3, %vezes, vezes_andar_esquerda
 .end_macro
 
@@ -73,8 +70,8 @@ esquerdaf_loop:
 	li	$a3, 0
 vezes_andar_cima:
 	addi	$a3, $a3, 1
-	sleep(16)
-	jal 	limpa_personagens
+	#sleep(16)
+	#jal 	limpa_personagens
 	move	$t5, $zero
 acimaf_loop:
 	add	$t2, $t5, %vetor
@@ -85,10 +82,10 @@ acimaf_loop:
 
 	ble	$t5, %tam,acimaf_loop
 	
-	la	$v0, pontos_mapa1
-	lw	$v1, tam_pontos_mapa1
-	pinta_ponto($v0, $v1)
-	jal	pinta_personagens
+	#la	$v0, pontos_mapa1
+	#lw	$v1, tam_pontos_mapa1
+	#pinta_ponto($v0, $v1)
+	#jal	pinta_personagens
 	ble	$a3, %vezes, vezes_andar_cima
 .end_macro	
 
@@ -96,8 +93,8 @@ acimaf_loop:
 	li	$a3, 0
 vezes_andar_baixo:
 	addi	$a3, $a3, 1
-	sleep(16)
-	jal	 limpa_personagens
+	#sleep(16)
+	#jal	 limpa_personagens
 	move	$t5, $zero
 baixof_loop:
 	add 	$t2, $t5, %vetor
@@ -107,10 +104,10 @@ baixof_loop:
 	addi	$t5, $t5, 4
 	ble	$t5, %tam,baixof_loop
 	
-	la	$v0, pontos_mapa1
-	lw	$v1, tam_pontos_mapa1
-	pinta_ponto($v0, $v1)
-	jal	pinta_personagens
+	#la	$v0, pontos_mapa1
+	#lw	$v1, tam_pontos_mapa1
+	#pinta_ponto($v0, $v1)
+	#jal	pinta_personagens
 	ble	$a3, %vezes, vezes_andar_baixo
 .end_macro
 
@@ -131,6 +128,21 @@ ler_array:
 	
 	blt	$t9, %tam, ler_array
 
+.end_macro
+.macro tirar_ponto(%vetor, %tam, %endereco)
+	move	$t9, $zero
+ler_array:
+	add	$t8, %vetor, $t9
+	addi	$t9, $t9, 4
+	lw	$s5,($t8) 
+	
+	bge	$t9, %tam, sair_tirar_ponto
+	bne	$s5,%endereco, ler_array
+	
+	sw	$zero,($t8) #se tiver o endereco do ponto ele poe zero
+	
+	blt	$t9, %tam, ler_array
+sair_tirar_ponto:
 .end_macro
 
 .kdata
@@ -162,17 +174,19 @@ pacman_tam: 		.word 440 #111*4  - 4
 tam_pontos_mapa1:	.word  396 #100*4  -4   
 tam_pontos_mapa2:	.word  396 #100*4  -4
 
+nivel:		.word 1
+
 pacman_dir: 		.space  444 # 111*4 
 
 fantasma_vermelho:	.space  632 # 111*4
 fantasma_azul: 	.space  632 # 111*4
 fantasma_laranja: 	.space  632 # 111*4
 fantasma_rosa:	.space  632 # 111*4
-
+array_traversia: .space 16
 pontos_mapa1:		.space 400 #100*4
 pontos_mapa2:		.space 400 #100*4
 
-array_traversia: .space 16
+
 .text 
 
 .globl main
@@ -181,7 +195,7 @@ main:
 	sw 	$zero, pontuacao #pontuacao do jogo inicial
 	lw 	$t0, bitmap_addr
 	
-	li	$s7, 000
+	li	$s7, 100
 	sw	$s7, pontuacao
 	j	 fase1
 	
@@ -199,58 +213,26 @@ fase1:
 	jal 	mostra_placar
 	
 	
-	la	$a2, fantasma_vermelho
-	lw	$a1, fantasma_tam 
 
-		move_fantasma_direita($a2, $a1,41)
-		move_fantasma_baixo($a2, $a1,38)
-		move_fantasma_direita($a2, $a1,41)
-		move_fantasma_baixo($a2, $a1,33)
-		
-		
-	la	$a2, fantasma_rosa
-	lw	$a1, fantasma_tam 
-		
-		move_fantasma_cima($a2, $a1,17)
-		move_fantasma_direita($a2, $a1,41)
-		move_fantasma_cima($a2, $a1,56)
-		move_fantasma_direita($a2, $a1,40)
-		move_fantasma_cima($a2, $a1,30)
-		
-	la	$a2, fantasma_azul
-	lw	$a1, fantasma_tam 
-	
-		move_fantasma_direita($a2, $a1,17)
-		move_fantasma_cima($a2, $a1,17)
-		move_fantasma_esquerda($a2, $a1,41)
-		move_fantasma_cima($a2, $a1,56)
-		move_fantasma_esquerda($a2, $a1,41)
-		move_fantasma_cima($a2, $a1,32)
-		
-	la	$a2, fantasma_laranja
-	lw	$a1, fantasma_tam 
-	
-		move_fantasma_esquerda($a2, $a1,17)
-		move_fantasma_cima($a2, $a1,17)
-		move_fantasma_esquerda($a2, $a1,41)
-		move_fantasma_baixo($a2, $a1,38)
-		move_fantasma_esquerda($a2, $a1,41)
-		move_fantasma_baixo($a2, $a1,33)
-
-		
 		
 fase1_loop:
-	#jal 	obter_teclado
-	#jal 	direita_prox # faz a moviemtação do pacman
+	jal 	obter_teclado
+	
+	jal 	limpa_personagens
+	
+	jal 	direita_prox # faz a moviemtação do pacman
 	
 	#faz a movimentação dos fantasmas
 	#jal	movimenta_fantasma_vermelho
 	#jal	movimenta_fantasma_laranja
 	#jal	movimenta_fantasma_azul
-	jal	movimenta_fantasma_rosa
+	#jal	movimenta_fantasma_rosa
 	
+	la	$v0, pontos_mapa1
+	lw	$v1, tam_pontos_mapa1
+	pinta_ponto($v0, $v1)
 
-	
+	jal	pinta_personagens
 	sleep(16)
 	jal 	verificar_ganho_fase1
 	j	fase1_loop
@@ -261,6 +243,9 @@ fase1_loop:
 fase2:
 	li 	$s7, 0x0001ff00 #muda a cor do labirinto
 	sw 	$s7, cor_lab_parede
+	
+	li	$s1, 2
+	sw	$s1, nivel
 	
 	li	$v0, 0	#deixa o pacman parado no inicio da fase
 	move	$v1, $v0
@@ -278,15 +263,24 @@ fase2:
 	
 fase2_loop:
 	jal 	obter_teclado
+	
+	jal 	limpa_personagens
 	jal 	direita_prox # faz a moviemtação do pacman
 		
 	#faz a movimentação dos fantasmas
 	#jal	movimenta_fantasma_vermelho
 	#jal	movimenta_fantasma_laranja
 	#jal	movimenta_fantasma_azul
-	jal	movimenta_fantasma_rosa
+	#jal	movimenta_fantasma_rosa
 	
+	la	$v0, pontos_mapa2
+	lw	$v1, tam_pontos_mapa2
+	pinta_ponto($v0, $v1)
+	jal	pinta_personagens
 	sleep(16)
+	
+	
+	
 	jal 	verificar_ganho_fase2
 	j	fase2_loop
 	
@@ -1283,6 +1277,18 @@ come_ponto_exit:
 	#	a2: o endereco do vetor a ser movimentado   #
 	#	a1: tamanho do array                        #
 	###########################################################
+move_map1:
+	move	$s1, $ra
+	la	$v0, pontos_mapa1
+	lw	$v1, tam_pontos_mapa1
+	tirar_ponto($v0, $v1, $t3)
+	jr	$s1
+move_map2:
+	move	$s4, $ra
+	la	$v0, pontos_mapa2
+	lw	$v1, tam_pontos_mapa2
+	tirar_ponto($v0, $v1, $t3)
+	jr	$s4
 move_direita:
 	move	$t5, $zero
 	move 	$a3, $ra
@@ -1306,6 +1312,15 @@ come_ponto_direita: #apaga o ponto que comeu do mapa e incrementa a pontuacao
 	move	$t5, $t6
 	addi	$t5, $t5, 2048 # 2*1024
 	
+	lw	$s6, nivel
+	beq 	$s6, 1, move_map1dir
+	beq 	$s6, 2, move_map2dir
+move_map1dir:
+	jal move_map1
+	j despinta_dir
+move_map2dir:
+	jal move_map2
+despinta_dir:
 	lw	$t1, cor_preto
 	jal 	pinta_retangulo
 	
@@ -1318,7 +1333,7 @@ come_ponto_direita: #apaga o ponto que comeu do mapa e incrementa a pontuacao
 	move	$t7,$s5
 
 n_come_ponto_direita:
-	jal 	limpa_personagens
+	#jal 	limpa_personagens
 	move	$t5, $zero
 direita_loop:
 	add 	$t2, $t5, $a2
@@ -1350,6 +1365,16 @@ come_ponto_esquerda: #apaga o ponto que comeu do mapa e incrementa a pontuacao
 	move	$t5, $t6
 	addi	$t5, $t5, 2048 # 2*1024
 	
+	lw	$s6, nivel
+	beq 	$s6, 1, move_map1esq
+	beq 	$s6, 2, move_map2esq
+move_map1esq:
+	jal move_map1
+	j despinta_esq
+move_map2esq:
+	jal move_map2
+despinta_esq:
+	
 	lw	$t1, cor_preto
 	jal 	pinta_retangulo
 	
@@ -1362,7 +1387,7 @@ come_ponto_esquerda: #apaga o ponto que comeu do mapa e incrementa a pontuacao
 	move	$t7,$s5
 n_come_ponto_esquerda:
 
-	jal	limpa_personagens
+	#jal	limpa_personagens
 	move	$t5, $zero
 esquerda_loop:
 	add $t2, $t5, $a2
@@ -1394,6 +1419,16 @@ come_ponto_cima: #apaga o ponto que comeu do mapa e incrementa a pontuacao
 	move	$t5, $t6
 	addi	$t5, $t5, 2048 # 2*1024
 	
+	lw	$s6, nivel
+	beq 	$s6, 1, move_map1cima
+	beq 	$s6, 2, move_map2cima
+move_map1cima:
+	jal move_map1
+	j despinta_cima
+move_map2cima:
+	jal move_map2
+despinta_cima:
+	
 	lw	$t1, cor_preto
 	jal 	pinta_retangulo
 	
@@ -1406,7 +1441,7 @@ come_ponto_cima: #apaga o ponto que comeu do mapa e incrementa a pontuacao
 	move	$t7,$s5
 	
 n_come_ponto_cima:
-	jal 	limpa_personagens
+	#jal 	limpa_personagens
 	move	$t5, $zero
 acima_loop:
 	add $t2, $t5, $a2
@@ -1439,6 +1474,16 @@ come_ponto_baixo: #apaga o ponto que comeu do mapa e incrementa a pontuacao
 	move	$t5, $t6
 	addi	$t5, $t5, 2048 # 2*1024
 	
+	lw	$s6, nivel
+	beq 	$s6, 1, move_map1baixo
+	beq 	$s6, 2, move_map2baixo
+move_map1baixo:
+	jal move_map1
+	j despinta_baixo
+move_map2baixo:
+	jal move_map2
+despinta_baixo:
+	
 	lw	$t1, cor_preto
 	jal 	pinta_retangulo
 	
@@ -1452,7 +1497,7 @@ come_ponto_baixo: #apaga o ponto que comeu do mapa e incrementa a pontuacao
 	
 n_come_ponto_baixo:
 
-	jal	 limpa_personagens
+	#jal	 limpa_personagens
 	move	$t5, $zero
 baixo_loop:
 	add 	$t2, $t5, $a2
@@ -1465,7 +1510,7 @@ baixo_loop:
 	j	baixo_loop
 	#bgt	$t4, 0x10010000, acima_loop_ext
 move_exit:
-	jal	pinta_personagens
+	#jal	pinta_personagens
 
 	jr	$a3
 	
