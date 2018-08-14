@@ -446,7 +446,7 @@ movimenta_fantasma_rosa:
 	addi	$t5, $t5, -20 #pra por na posicao certa da verificacao do caminho
 	addi	$t5, $t5, -2048
 	jal	verifica_traversia
-	beq	$a1, 0, anda_rosa # se não existe a traversia continua na mesma direcao
+	beq	$a3, 0, anda_rosa # se não existe a traversia continua na mesma direcao
     
 loop_random_rosa:   
 	li	$v0, 42        #Syscall Random
@@ -500,30 +500,32 @@ movimenta_fantasma_azul:
 	lw	$v0, direcao_pacman
 	move	$t7, $ra
     zera_arrazy_traversia()
+   	lw	$a2, direcao_fazul
 	lw	$t5, fantasma_azul  
 	addi	$t5, $t5, -20 #pra por na posicao certa da verificacao do caminho
 	addi	$t5, $t5, -2048
 	jal	verifica_traversia
-    	beq	$a1, 0, anda_azul # se não existe a traversia continua na mesma direcao
+    	beq	$a3, 0, anda_azul # se não existe a traversia continua na mesma direcao
     	lw $t1, direcao_pacman
     	beqz $t1, exit_azul
     	
-add $t2, $zero,$zero
-addi $t1, $t1, -1
-mul $t1,$t1,4
+add	$t2, $zero,$zero
+addi	$t1, $t1, -1
+mul	$t1,$t1,4
+
 loop_verificar_se_travessia_azul:
- 	lw $t6, array_travessia ($t1)
- 	beq $t6,1, mover_azul
- 	addi $t1, $t1, 4
- 	beq $t1, 16, resetar_atravessia_azul
- 	beqz $t6,loop_verificar_se_travessia_azul
+ 	lw	$t6, array_travessia ($t1)
+ 	beq	$t6,1, mover_azul
+ 	addi	$t1, $t1, 4
+ 	beq	$t1, 16, resetar_atravessia_azul
+ 	beqz	$t6,loop_verificar_se_travessia_azul
 resetar_atravessia_azul:
-	sw $zero, array_travessia($t2)
-	addi $t2, $t2, 4
-	bne $t2, 16, loop_verificar_se_travessia_azul
+	sw	$zero, array_travessia($t2)
+	addi	$t2, $t2, 4
+	bne	$t2, 16, loop_verificar_se_travessia_azul
 mover_azul:
-	div $t1,$t1,4
-	addi $t1, $t1, 1
+	div	$t1,$t1,4
+	addi	$t1, $t1, 1
 	#Chamae mover macro aq
 #pacman_dir:  0 - parado, 1- direita, 2- esquerda, 3- cima, 4-baixo
 #array_travessia 0- direita, 1- esquerda, 2-cima, 3-baixo
@@ -590,7 +592,7 @@ verifica_traversia_esquerda:
 	addi	$t9, $t9, 4
 	
     	move	$t3, $t5
-    	addi	$t3, $t3,-4
+    	addi	$t3, $t3,-8
     	addi	$t3, $t3,2048
 	move	$t6, $t3
 	addi	$t6, $t6, 13312
@@ -618,7 +620,7 @@ verifica_traversia_baixo:
 	addi	$t9, $t9, 4
 
 	addi	$t3, $t5,15360
-	#addi	$t3, $t5,1024
+	addi	$t3, $t3,3072
 	move	$t6, $t3
 	addi	$t6, $t6, 52
 	jal	verifica_topos
@@ -639,6 +641,7 @@ verifica_traversia_exit:
         #    a3 -> 1 se existe traversia
         #########################################################
 verifica_valor_no_array:
+
 	beq	$a2, 0, tem_traversia
 	beq	$a2, 1, verifica_array_topos
 	beq	$a2, 2, verifica_array_topos
