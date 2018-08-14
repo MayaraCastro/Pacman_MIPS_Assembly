@@ -23,6 +23,7 @@
 	#	%tam: tamanho do array 
 	#	%vezes : quantidade de vezes que anda
 	###########################################################
+
 .macro move_fantasma_direita(%vetor, %tam, %vezes)
 	li	$a3, 0
 vezes_andar_direita:
@@ -265,6 +266,8 @@ pacman_tam: 		.word 440 #111*4  - 4
 tam_pontos_mapa1:	.word  396 #100*4  -4   
 tam_pontos_mapa2:	.word  396 #100*4  -4
 
+posicao_vermelho:	.word 0 # {0,1,2,3)
+
 nivel:		.word 1
 vidas:		.word 3
 
@@ -287,7 +290,7 @@ main:
 	sw 	$zero, pontuacao #pontuacao do jogo inicial
 	lw 	$t0, bitmap_addr
 	
-	li	$s7, 000
+	li	$s7, 100
 	sw	$s7, pontuacao
 	#j venceu
 	jal	desenha_vidas
@@ -326,7 +329,7 @@ fase1_loop:
 	jal 	direita_prox # faz a moviemtação do pacman
 	
 	#faz a movimentação dos fantasmas
-	#jal	movimenta_fantasma_vermelho
+	jal	movimenta_fantasma_vermelho
 	jal	movimenta_fantasma_laranja
 	jal	movimenta_fantasma_azul
 	jal	movimenta_fantasma_rosa
@@ -359,6 +362,7 @@ reinicia_fase2:
 	sw	$v0,direcao_pacman
 	sw	$v0,direcao_pacman_prox
 	sw	$v0, 0xFFFF0004
+	
 	#jal	transicao_estagio
 	jal	pintar_tela
 	jal 	escreve_titulo
@@ -381,10 +385,10 @@ fase2_loop:
 	jal 	direita_prox # faz a moviemtação do pacman
 		
 	#faz a movimentação dos fantasmas
-	#jal	movimenta_fantasma_vermelho
-	#jal	movimenta_fantasma_laranja
-	#jal	movimenta_fantasma_azul
-	#jal	movimenta_fantasma_rosa
+	jal	movimenta_fantasma_vermelho
+	jal	movimenta_fantasma_laranja
+	jal	movimenta_fantasma_azul
+	jal	movimenta_fantasma_rosa
 	
 	la	$v0, pontos_mapa2
 	lw	$v1, tam_pontos_mapa2
@@ -405,20 +409,100 @@ fase2_loop:
 	###########################################
 movimenta_fantasma_vermelho:
 	move	$t7, $ra
-	
-	lw	$t1, fantasma_vermelho  
-	lw	$a2, direcao_fvermelho
- 	addi	$t5, $t5, -20 #pra por na posicao certa da verificacao do caminho
-	addi	$t5, $t5, -1024
+    	zera_arrazy_traversia()
+   	lw	$a2, direcao_fvermelho
+	lw	$t5, fantasma_vermelho 
+	  
+	addi	$t5, $t5, -20 #pra por na posicao certa da verificacao do caminho
+	addi	$t5, $t5, -2048
 	jal	verifica_traversia
-	beq	$a1, 0, exit_vermelho # se não existe a traversia
-
-lw	$t1, fantasma_vermelho
-lw	$t2, pacman_dir
-div 	$t2, $t2, 4
-exit_vermelho:
-	jr	$t7
+    	beq	$a3, 0, anda_vermelho # se não existe a traversia continua na mesma direcao
+    	lw   $t1, posicao_vermelho
+   
+    	
+add	$t2, $zero,$zero
+mul	$t1,$t1,4
+#Verifica o do 
+loop_verificar_se_travessia_vermelho:
+ 	lw	$t6, array_travessia ($t1)
+ 	beq	$t6,1, mover_vermelho
+ 	beq	$t1, 16, resetar_travessia_vermelho
+ 	addi	$t1, $t1, 4
+ 	beqz	$t6,loop_verificar_se_travessia_vermelho
+ 	j	salvar_ponteiro_vermelho
+resetar_travessia_vermelho:
+	add	$t1, $zero, $zero
+	j loop_verificar_se_travessia_vermelho
+salvar_ponteiro_vermelho:
 	
+mover_vermelho:
+	div	$t1,$t1,4
+	addi	$t1, $t1, 1
+	sw	$t1, direcao_fvermelho
+	beq	$t1, 4, resetar_posicao
+	sw	$t1, posicao_vermelho
+	sw	$t1, direcao_fvermelho
+	j	anda_vermelho
+
+resetar_posicao:
+	sw  	$zero,posicao_vermelho
+	#Chamae mover macro aq
+
+#ponteiro 0- direita, 1- esquerda, 2-cima, 3-baixo
+
+anda_vermelho:
+	lw	$a0, direcao_fvermelho
+	la	$v0, direcao_fvermelho
+	addi	$a0, $a0, -1
+	
+	
+	beq	$a0, 0, vermelho_direita
+	beq	$a0, 1, vermelho_esquerda
+	beq	$a0, 2, vermelho_cima
+	beq	$a0, 3, vermelho_baixo
+	j	exit_vermelho
+vermelho_direita:
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0) 
+	
+	la	$a2, fantasma_vermelho
+	lw	$a1, fantasma_tam 
+	beqz	$t1, direita_contrario
+		move_fantasma_direita($a2, $a1, 1)
+	j	exit_vermelho
+vermelho_esquerda:  
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0) 
+	
+	la	$a2, fantasma_vermelho
+	lw	$a1, fantasma_tam
+	beqz	$t1, esquerda_contrario 
+		move_fantasma_esquerda($a2, $a1,1)
+	j	exit_vermelho
+vermelho_cima:  
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0) 
+	
+	
+	la	$a2, fantasma_vermelho
+	lw	$a1, fantasma_tam 
+	beqz	$t1, cima_contrario
+		move_fantasma_cima($a2, $a1,1)
+	j	exit_vermelho
+vermelho_baixo:  
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0) 
+	
+	la	$a2, fantasma_vermelho
+	lw	$a1, fantasma_tam 
+	beqz	$t1, baixo_contrario
+		move_fantasma_baixo($a2, $a1,1)
+		
+exit_vermelho:
+	
+	#Chamar funcao mover() para a posicao q ele ja tava andando antes 
+	jr	$t7	
+
 	###########################################
 	#	MOVIMENTA FANTASMA LARANJA	#
 	###########################################
@@ -460,9 +544,10 @@ mul $t1,$t1,4
  loop_verificar_se_travessia_laranja:
  	lw 	$t6, array_travessia ($t1)
  	beq 	$t6,1, mover_laranja
- 	addi 	$t1, $t1, 4
  	beq 	$t1, 16, resetar_travessia_laranja
+ 	addi 	$t1, $t1, 4
  	beq	$t6, 1,loop_verificar_se_travessia_laranja
+ 	j 	mover_laranja
 resetar_travessia_laranja:
 	add	$t1, $zero, $zero
 	j	loop_verificar_se_travessia_laranja
@@ -635,9 +720,11 @@ mul	$t1,$t1,4
 loop_verificar_se_travessia_azul:
  	lw	$t6, array_travessia ($t1)
  	beq	$t6,1, mover_azul
- 	addi	$t1, $t1, 4
+ 	
  	beq	$t1, 16, resetar_atravessia_azul
+ 	addi	$t1, $t1, 4
  	beqz	$t6,loop_verificar_se_travessia_azul
+ 	j 	mover_azul
 resetar_atravessia_azul:
 	#sw	$zero, array_travessia($t2)
 	#addi	$t2, $t2, 4
@@ -2929,7 +3016,7 @@ obstaculos_fase1:
 	li	$t5, 199304 #canto inferior direito do retangulo
 	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo
-	
+	#
 	li	$t3, 176680 #canto topo esquerdo do retangulo
 	li	$t6, 176748 #canto topo direito do retangulo
 	li	$t5, 177772 #canto inferior direito do retangulo
@@ -2964,7 +3051,7 @@ obstaculos_fase2:
 	
 	li	$t3, 69104 #canto topo esquerdo do retangulo
 	addi	$t6, $t3, 36 #canto topo direito do retangulo 36
-	addi	$t5, $t6, 32768 #canto inferior direito do retangulo
+	addi	$t5, $t6, 31744 #canto inferior direito do retangulo
 	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo
 	
@@ -2985,7 +3072,7 @@ obstaculos_fase2:
 	#RETANGULO DIREITO TOPO 1
 	li	$t3, 84560 #canto topo esquerdo do retangulo
 	addi	$t6, $t3, 56 #canto topo direito do retangulo 212
-	addi	$t5, $t6, 17408 #canto inferior direito do retangulo
+	addi	$t5, $t6, 16384 #canto inferior direito do retangulo
 	#li	$t6, 84780 #canto topo direito do retangulo
 	#li	$t5, 102188 #canto inferior direito do retangulo
 	lw	$t1, cor_lab_parede
@@ -2994,7 +3081,7 @@ obstaculos_fase2:
 	#RETANGULO DIREITO TOPO 2
 	li	$t3, 84676 #canto topo esquerdo do retangulo
 	addi	$t6, $t3, 100 #canto topo direito do retangulo 212
-	addi	$t5, $t6, 17408 #canto inferior direito do retangulo
+	addi	$t5, $t6, 16384 #canto inferior direito do retangulo
 	#li	$t6, 84780 #canto topo direito do retangulo
 	#li	$t5, 102188 #canto inferior direito do retangulo
 	lw	$t1, cor_lab_parede
@@ -3140,7 +3227,8 @@ pinta_borda:
 	li $t3, 153728 #canto topo esquerdo do retangulo
 	li $t6, 153732 #canto topo direito do retangulo
 	li $t5, 169092 #canto inferior direito do retangulo
-	lw $t1, cor_lab_branco
+	#lw $t1, cor_lab_branco
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	li $t3, 170112 #canto topo esquerdo do retangulo
@@ -3151,18 +3239,18 @@ pinta_borda:
 
 	li $t3, 170248 #canto topo esquerdo do retangulo
 	li $t6, 170296 #canto topo direito do retangulo
-	li $t5, 199976 #canto inferior direito do retangulo
+	li $t5, 198952 #canto inferior direito do retangulo
 	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	li $t3, 190592 #canto topo esquerdo do retangulo
 	li $t6, 190724 #canto topo direito do retangulo
-	li $t5, 199940 #canto inferior direito do retangulo
+	li $t5, 198916 #canto inferior direito do retangulo
 	lw $t1, cor_lab_parede
 	jal pinta_retangulo	
 	
-	li $t3, 200832 #canto topo esquerdo do retangulo
-	li $t6, 200848 #canto topo direito do retangulo
+	li $t3, 199808 #canto topo esquerdo do retangulo
+	li $t6, 199824 #canto topo direito do retangulo
 	li $t5, 255120 #canto inferior direito do retangulo
 	lw $t1, cor_lab_parede
 	jal pinta_retangulo
@@ -3202,7 +3290,8 @@ pinta_borda:
 	li $t3, 153464 #canto topo esquerdo do retangulo
 	li $t6, 153468 #canto topo direito do retangulo
 	li $t5, 168688 #canto inferior direito do retangulo
-	lw $t1, cor_lab_branco
+	#lw $t1, cor_lab_branco
+	lw $t1, cor_lab_parede
 	jal pinta_retangulo
 	
 	li $t3, 143088 #canto topo esquerdo do retangulo
