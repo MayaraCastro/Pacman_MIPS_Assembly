@@ -327,7 +327,7 @@ fase1_loop:
 	
 	#faz a movimentação dos fantasmas
 	#jal	movimenta_fantasma_vermelho
-	#jal	movimenta_fantasma_laranja
+	jal	movimenta_fantasma_laranja
 	jal	movimenta_fantasma_azul
 	jal	movimenta_fantasma_rosa
 	
@@ -424,16 +424,82 @@ exit_vermelho:
 	###########################################
 movimenta_fantasma_laranja:
 	move	$t7, $ra
-    
-	lw	$t1, fantasma_laranja  
-	lw	$a2, direcao_flaranja
- 	addi	$t5, $t5, -20 #pra por na posicao certa da verificacao do caminho
-	addi	$t5, $t5, -1024
+	
+	zera_arrazy_traversia()
+    	lw	$a2, direcao_flaranja
+	lw	$t5, fantasma_laranja 
+	addi	$t5, $t5, -20 #pra por na posicao certa da verificacao do caminho
+	addi	$t5, $t5, -2048
 	jal	verifica_traversia
-	beq	$a1, 0, exit_laranja # se não existe a traversia
-    
+    	beq	$a3, 0, anda_laranja # se não existe a traversia continua na mesma direcao
+    	
+    	lw $t1, direcao_pacman
+    	beqz $t1, exit_laranja
+    	#0parad, 1- direira, 2- esq, 3- cima, 4- baixo
+#Trocar posicao
+	beq $t1, 1, trocar_esquerda
+	beq $t1, 2, trocar_direita
+	beq $t1, 3, trocar_baixo
+	beq $t1, 4, trocar_cima
+trocar_esquerda:
+	addi $t1, $zero,2
+	j verificar_laranja
+trocar_direita:
+	addi $t1, $zero,1
+	j verificar_laranja
+trocar_baixo:
+	addi $t1, $zero,4
+	j verificar_laranja
+trocar_cima:
+	addi $t1, $zero,3
+	
+verificar_laranja:	
+add $t2, $zero,$zero
+addi $t1, $t1, -1
+mul $t1,$t1,4
+ loop_verificar_se_travessia_laranja:
+ 	lw 	$t6, array_travessia ($t1)
+ 	beq 	$t6,1, mover_laranja
+ 	addi 	$t1, $t1, 4
+ 	beq 	$t1, 16, resetar_travessia_laranja
+ 	beq	$t6, 1,loop_verificar_se_travessia_laranja
+resetar_travessia_laranja:
+	zera_arrazy_traversia()
+mover_laranja:
+	div 	$t1,$t1,4
+	addi 	$t1,$t1,1
+	sw $t1, direcao_flaranja
+anda_laranja:
+	lw	$a0, direcao_flaranja
+	
+	beq	$a0, 1, laranja_direita
+	beq	$a0, 2, laranja_esquerda
+	beq	$a0, 3, laranja_cima
+	beq	$a0, 4, laranja_baixo
+	j	exit_laranja
+laranja_direita:
+	la	$a2, fantasma_laranja
+	lw	$a1, fantasma_tam 
+		move_fantasma_direita($a2, $a1, 1)
+	j	exit_laranja
+laranja_esquerda:  
+	la	$a2, fantasma_laranja
+	lw	$a1, fantasma_tam 
+		move_fantasma_esquerda($a2, $a1,1)
+	j	exit_laranja
+laranja_cima:  
+	la	$a2, fantasma_laranja
+	lw	$a1, fantasma_tam 
+		move_fantasma_cima($a2, $a1,1)
+	j	exit_laranja
+laranja_baixo:  
+	la	$a2, fantasma_laranja
+	lw	$a1, fantasma_tam 
+		move_fantasma_baixo($a2, $a1,1)
 exit_laranja:
-	jr	$t7
+	lw $t4, direcao_flaranja
+	#Chamar funcao mover() para a posicao q ele ja tava andando antes 
+	jr	$t7	
 	
 	###########################################
 	#	MOVIMENTA FANTASMA ROSA	#
@@ -462,30 +528,61 @@ loop_random_rosa:
 	sw	$a0, direcao_frosa
 anda_rosa:
 	lw	$a0, direcao_frosa
+	la	$v0,direcao_frosa
 	
-	beq	$a0, 1, rosa_direita
-	beq	$a0, 2, rosa_esquerda
-	beq	$a0, 3, rosa_cima
-	beq	$a0, 4, rosa_baixo
+	addi	$a0, $a0, -1
+	
+	beq	$a0, 0, rosa_direita
+	beq	$a0, 1, rosa_esquerda
+	beq	$a0, 2, rosa_cima
+	beq	$a0, 3, rosa_baixo
 	j	exit_rosa
 rosa_direita:
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0) 
+
+	
 	la	$a2, fantasma_rosa
 	lw	$a1, fantasma_tam 
+	
+	beqz	$t1, direita_contrario
+		
 		move_fantasma_direita($a2, $a1, 1)
 	j	exit_rosa
+
 rosa_esquerda:  
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0) 
+
+	
 	la	$a2, fantasma_rosa
 	lw	$a1, fantasma_tam 
+	
+	beqz	$t1, esquerda_contrario
+	
 		move_fantasma_esquerda($a2, $a1,1)
 	j	exit_rosa
 rosa_cima:  
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0) 
+
 	la	$a2, fantasma_rosa
 	lw	$a1, fantasma_tam 
+	
+	beqz	$t1, cima_contrario
+	
 		move_fantasma_cima($a2, $a1,1)
 	j	exit_rosa
 rosa_baixo:  
+	
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0) 
+	
 	la	$a2, fantasma_rosa
 	lw	$a1, fantasma_tam 
+	
+	beqz	$t1, baixo_contrario
+	
 		move_fantasma_baixo($a2, $a1,1)
 	
 	j	exit_rosa
@@ -533,38 +630,76 @@ mover_azul:
 	sw $t1, direcao_fazul
 anda_azul:
 	lw	$a0, direcao_fazul
+	la	$v0, direcao_fazul
+	addi	$a0, $a0, -1
 	
-	beq	$a0, 1, azul_direita
-	beq	$a0, 2, azul_esquerda
-	beq	$a0, 3, azul_cima
-	beq	$a0, 4, azul_baixo
+	
+	beq	$a0, 0, azul_direita
+	beq	$a0, 1, azul_esquerda
+	beq	$a0, 2, azul_cima
+	beq	$a0, 3, azul_baixo
 	j	exit_azul
 azul_direita:
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0) 
+	
 	la	$a2, fantasma_azul
 	lw	$a1, fantasma_tam 
+	beqz	$t1, direita_contrario
 		move_fantasma_direita($a2, $a1, 1)
 	j	exit_azul
 azul_esquerda:  
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0) 
+	
 	la	$a2, fantasma_azul
-	lw	$a1, fantasma_tam 
+	lw	$a1, fantasma_tam
+	beqz	$t1, esquerda_contrario 
 		move_fantasma_esquerda($a2, $a1,1)
-	j	exit_rosa
+	j	exit_azul
 azul_cima:  
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0) 
+	
+	
 	la	$a2, fantasma_azul
 	lw	$a1, fantasma_tam 
+	beqz	$t1, cima_contrario
 		move_fantasma_cima($a2, $a1,1)
-	j	exit_rosa
+	j	exit_azul
 azul_baixo:  
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0) 
+	
 	la	$a2, fantasma_azul
 	lw	$a1, fantasma_tam 
+	beqz	$t1, baixo_contrario
 		move_fantasma_baixo($a2, $a1,1)
 		
 exit_azul:
 	
 	#Chamar funcao mover() para a posicao q ele ja tava andando antes 
 	jr	$t7	
-	
-	
+cima_contrario:
+	move_fantasma_baixo($a2, $a1,1)
+	li	$a0, 4
+	sw	$a0, ($v0)
+	jr	$t7	
+baixo_contrario:
+	move_fantasma_cima($a2, $a1,1)
+	li	$a0, 3
+	sw	$a0, ($v0)
+	jr	$t7	
+direita_contrario:
+	move_fantasma_esquerda($a2, $a1,1)
+	li	$a0, 2
+	sw	$a0, ($v0)
+	jr	$t7	
+esquerda_contrario:
+	move_fantasma_direita($a2, $a1,1)
+	li	$a0, 1
+	sw	$a0, ($v0)
+	jr	$t7		
     	########################################################
     	#    VERIFICA SE O FANTASMA TA EM UMA TRAVERSIA        #
     	#     	0 : DIREITA	(tem valor 1)              #
