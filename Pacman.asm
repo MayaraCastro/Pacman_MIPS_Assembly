@@ -230,10 +230,10 @@ n_morreu:
 .end_macro
 
 .macro zera_arrazy_traversia()
-	sw	$zero, array_traversia +0
-	sw	$zero, array_traversia + 4
-	sw	$zero, array_traversia +8
-	sw	$zero, array_traversia +12
+	sw	$zero, array_travessia +0
+	sw	$zero, array_travessia + 4
+	sw	$zero, array_travessia +8
+	sw	$zero, array_travessia +12
 	
 .end_macro
 .kdata
@@ -274,7 +274,7 @@ fantasma_vermelho:	.space  632 # 111*4
 fantasma_azul: 	.space  632 # 111*4
 fantasma_laranja: 	.space  632 # 111*4
 fantasma_rosa:	.space  632 # 111*4
-array_traversia:	.space 16
+array_travessia:	.space 16
 pontos_mapa1:		.space 400 #100*4
 pontos_mapa2:		.space 400 #100*4
 
@@ -314,10 +314,11 @@ reinicia_fase1:
 	pinta_ponto($v0, $v1)
 	
 	jal	desenha_vidas
-	sw	$v0,direcao_pacman
-	sw	$v0,direcao_pacman_prox
-	sw	$v0, 0xFFFF0004
+	sw	$zero,direcao_pacman
+	sw	$zero,direcao_pacman_prox
+	sw	$zero, 0xFFFF0004
 fase1_loop:
+	
 	jal 	obter_teclado
 	
 	jal 	limpa_personagens
@@ -327,7 +328,7 @@ fase1_loop:
 	#faz a movimentação dos fantasmas
 	#jal	movimenta_fantasma_vermelho
 	#jal	movimenta_fantasma_laranja
-	#jal	movimenta_fantasma_azul
+	jal	movimenta_fantasma_azul
 	jal	movimenta_fantasma_rosa
 	
 	la	$v0, pontos_mapa1
@@ -453,7 +454,7 @@ loop_random_rosa:
 	syscall           # Pegar em a0
     
 	mul	$t5, $a0,4
-	lw	$t2, array_traversia($t5)
+	lw	$t2, array_travessia($t5)
 	beqz	$t2, loop_random_rosa
 	addi	$a0, $a0,1   #Ajeita pra ficar igual ao Array normal
  
@@ -496,15 +497,71 @@ exit_rosa:
 	#	MOVIMENTA FANTASMA AZUL	#
 	###########################################
 movimenta_fantasma_azul:
+	lw	$v0, direcao_pacman
 	move	$t7, $ra
-    
+    zera_arrazy_traversia()
 	lw	$t5, fantasma_azul  
 	addi	$t5, $t5, -20 #pra por na posicao certa da verificacao do caminho
-	addi	$t5, $t5, -1024
+	addi	$t5, $t5, -2048
 	jal	verifica_traversia
-    
-    
+    	beq	$a1, 0, anda_azul # se não existe a traversia continua na mesma direcao
+    	lw $t1, direcao_pacman
+    	beqz $t1, exit_azul
+    	
+add $t2, $zero,$zero
+addi $t1, $t1, -1
+mul $t1,$t1,4
+loop_verificar_se_travessia_azul:
+ 	lw $t6, array_travessia ($t1)
+ 	beq $t6,1, mover_azul
+ 	addi $t1, $t1, 4
+ 	beq $t1, 16, resetar_atravessia_azul
+ 	beqz $t6,loop_verificar_se_travessia_azul
+resetar_atravessia_azul:
+	sw $zero, array_travessia($t2)
+	addi $t2, $t2, 4
+	bne $t2, 16, loop_verificar_se_travessia_azul
+mover_azul:
+	div $t1,$t1,4
+	addi $t1, $t1, 1
+	#Chamae mover macro aq
+#pacman_dir:  0 - parado, 1- direita, 2- esquerda, 3- cima, 4-baixo
+#array_travessia 0- direita, 1- esquerda, 2-cima, 3-baixo
+
+	sw $t1, direcao_fazul
+anda_azul:
+	lw	$a0, direcao_fazul
+	
+	beq	$a0, 1, azul_direita
+	beq	$a0, 2, azul_esquerda
+	beq	$a0, 3, azul_cima
+	beq	$a0, 4, azul_baixo
+	j	exit_azul
+azul_direita:
+	la	$a2, fantasma_azul
+	lw	$a1, fantasma_tam 
+		move_fantasma_direita($a2, $a1, 1)
+	j	exit_azul
+azul_esquerda:  
+	la	$a2, fantasma_azul
+	lw	$a1, fantasma_tam 
+		move_fantasma_esquerda($a2, $a1,1)
+	j	exit_rosa
+azul_cima:  
+	la	$a2, fantasma_azul
+	lw	$a1, fantasma_tam 
+		move_fantasma_cima($a2, $a1,1)
+	j	exit_rosa
+azul_baixo:  
+	la	$a2, fantasma_azul
+	lw	$a1, fantasma_tam 
+		move_fantasma_baixo($a2, $a1,1)
+		
+exit_azul:
+	
+	#Chamar funcao mover() para a posicao q ele ja tava andando antes 
 	jr	$t7	
+	
 	
     	########################################################
     	#    VERIFICA SE O FANTASMA TA EM UMA TRAVERSIA        #
@@ -522,11 +579,11 @@ verifica_traversia_direita:
 	addi	$t3, $t3,2048
 	move	$t6, $t3
 	addi	$t6, $t6, 13312
-	jal	verifica_laterais
+	jal	verifica_laterais 
 	beq	$a3, 1, verifica_traversia_esquerda
     
 	li	$t2, 1 #quando é possível ir para a direita
-	sw	$t2,array_traversia($t9)
+	sw	$t2,array_travessia($t9)
     
     
 verifica_traversia_esquerda:
@@ -541,7 +598,7 @@ verifica_traversia_esquerda:
 	beq	$a3, 1, verifica_traversia_cima
     
 	li	$t2, 1 #quando é possível ir para a esquerda
-	sw	$t2,array_traversia($t9)
+	sw	$t2,array_travessia($t9)
 
 
 verifica_traversia_cima:
@@ -554,20 +611,21 @@ verifica_traversia_cima:
 	beq	$a3, 1, verifica_traversia_baixo
     
 	li	$t2, 1 #quando é possível ir para a cima
-	sw	$t2,array_traversia($t9)
+	sw	$t2,array_travessia($t9)
     
     
 verifica_traversia_baixo:
 	addi	$t9, $t9, 4
 
 	addi	$t3, $t5,15360
+	#addi	$t3, $t5,1024
 	move	$t6, $t3
 	addi	$t6, $t6, 52
 	jal	verifica_topos
 	beq	$a3, 1, verifica_traversia_exit
     
 	li	$t2, 1 #quando é possível ir para a baixo
-	sw	$t2,array_traversia($t9)
+	sw	$t2,array_travessia($t9)
     
 verifica_traversia_exit:
 	jal	verifica_valor_no_array
@@ -587,18 +645,18 @@ verifica_valor_no_array:
 	beq	$a2, 3, verifica_array_laterais
 	beq	$a2, 4, verifica_array_laterais
 verifica_array_topos:
-	lw	$t2, array_traversia + 12
+	lw	$t2, array_travessia + 12
 	beq	$t2, 1, tem_traversia
         
-	lw	$t2, array_traversia + 8
+	lw	$t2, array_travessia + 8
 	beq	$t2, 1, tem_traversia
 	j	n_tem_traversia
         
 verifica_array_laterais:
-	lw	$t2, array_traversia + 0
+	lw	$t2, array_travessia + 0
 	beq	$t2, 1, tem_traversia
         
-	lw	$t2, array_traversia + 4
+	lw	$t2, array_travessia + 4
 	beq	$t2, 1, tem_traversia
 	j	n_tem_traversia
 n_tem_traversia:
@@ -1655,6 +1713,7 @@ direita_prox:
 	lw 	$a1, pacman_tam
 	jal	move_direita
 	
+	li	$v1, 1
 	sw	$v1, direcao_pacman
 	
 	jr	$t7
@@ -1672,6 +1731,7 @@ esquerda_prox:
 	lw 	$a1, pacman_tam
 	jal	move_esquerda
 	
+	li	$v1, 2
 	sw	$v1, direcao_pacman
 	
 	jr	$t7
@@ -1689,6 +1749,7 @@ cima_prox:
 	lw 	$a1, pacman_tam
 	jal	move_cima
 	
+	li	$v1, 3
 	sw	$v1, direcao_pacman
 	jr	$t7
 	#j	main_1
@@ -1706,6 +1767,7 @@ baixo_prox:
 	lw 	$a1, pacman_tam
 	jal	move_baixo
 	
+	li	$v1, 4
 	sw	$v1, direcao_pacman
 	jr	$t7
 	
