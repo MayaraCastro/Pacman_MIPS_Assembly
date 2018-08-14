@@ -290,7 +290,7 @@ main:
 	sw 	$zero, pontuacao #pontuacao do jogo inicial
 	lw 	$t0, bitmap_addr
 	
-	li	$s7, 100
+	li	$s7, 000
 	sw	$s7, pontuacao
 	#j venceu
 	jal	desenha_vidas
@@ -438,7 +438,7 @@ salvar_ponteiro_vermelho:
 mover_vermelho:
 	div	$t1,$t1,4
 	addi	$t1, $t1, 1
-	sw	$t1, direcao_fvermelho
+
 	beq	$t1, 4, resetar_posicao
 	sw	$t1, posicao_vermelho
 	sw	$t1, direcao_fvermelho
@@ -3057,14 +3057,14 @@ obstaculos_fase2:
 	
 	#RETANGULO ESQUERDO TOPO 1
 	li	$t3, 84180 #canto topo esquerdo do retangulo
-	addi	$t6, $t3, 100 #canto topo direito do retangulo 212
+	addi	$t6, $t3, 96 #canto topo direito do retangulo 212
 	addi	$t5, $t6, 17408 #canto inferior direito do retangulo
 	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo  #retangulo topo esquerdo
 	
 	#RETANGULO ESQUERDO TOPO 2
 	li	$t3, 84340 #canto topo esquerdo do retangulo
-	addi	$t6, $t3, 56 #canto topo direito do retangulo 212
+	addi	$t6, $t3, 52 #canto topo direito do retangulo 212
 	addi	$t5, $t6, 17408 #canto inferior direito do retangulo
 	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo  #retangulo topo esquerdo
@@ -3090,14 +3090,14 @@ obstaculos_fase2:
 	
 	#RETANGULO ESQUERDO INFERIOR 1
 	li	$t3, 215252 #canto topo esquerdo do retangulo
-	addi	$t6, $t3, 100 #canto topo direito do retangulo 212
+	addi	$t6, $t3, 96 #canto topo direito do retangulo 212
 	addi	$t5, $t6, 17408 #canto inferior direito do retangulo
 	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo  #retangulo topo esquerdo
 	
 	#RETANGULO ESQUERDO INFERIOR 2
 	li	$t3, 215412 #canto topo esquerdo do retangulo
-	addi	$t6, $t3, 56 #canto topo direito do retangulo 212
+	addi	$t6, $t3, 52 #canto topo direito do retangulo 212
 	addi	$t5, $t6, 17408 #canto inferior direito do retangulo
 	lw	$t1, cor_lab_parede
 	jal	pinta_retangulo  #retangulo topo esquerdo
