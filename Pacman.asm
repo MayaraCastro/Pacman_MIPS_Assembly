@@ -464,37 +464,59 @@ mul $t1,$t1,4
  	beq 	$t1, 16, resetar_travessia_laranja
  	beq	$t6, 1,loop_verificar_se_travessia_laranja
 resetar_travessia_laranja:
-	zera_arrazy_traversia()
+	add	$t1, $zero, $zero
+	j	loop_verificar_se_travessia_laranja
 mover_laranja:
 	div 	$t1,$t1,4
 	addi 	$t1,$t1,1
 	sw $t1, direcao_flaranja
 anda_laranja:
 	lw	$a0, direcao_flaranja
+	la	$v0,direcao_flaranja
 	
-	beq	$a0, 1, laranja_direita
-	beq	$a0, 2, laranja_esquerda
-	beq	$a0, 3, laranja_cima
-	beq	$a0, 4, laranja_baixo
+	addi	$a0, $a0, -1
+	
+	beq	$a0, 0, laranja_direita
+	beq	$a0, 1, laranja_esquerda
+	beq	$a0, 2, laranja_cima
+	beq	$a0, 3, laranja_baixo
 	j	exit_laranja
 laranja_direita:
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0)
+	
 	la	$a2, fantasma_laranja
 	lw	$a1, fantasma_tam 
+	beqz	$t1, direita_contrario
 		move_fantasma_direita($a2, $a1, 1)
 	j	exit_laranja
-laranja_esquerda:  
+laranja_esquerda: 
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0)
+  
 	la	$a2, fantasma_laranja
 	lw	$a1, fantasma_tam 
+	beqz	$t1, esquerda_contrario
+	
 		move_fantasma_esquerda($a2, $a1,1)
 	j	exit_laranja
 laranja_cima:  
-	la	$a2, fantasma_laranja
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0)
+
+		la	$a2, fantasma_laranja
 	lw	$a1, fantasma_tam 
+	beqz	$t1, cima_contrario
+	
 		move_fantasma_cima($a2, $a1,1)
 	j	exit_laranja
 laranja_baixo:  
+	mul	$a0,$a0,4
+	lw	$t1,array_travessia ($a0) 
+
 	la	$a2, fantasma_laranja
 	lw	$a1, fantasma_tam 
+	beqz	$t1, baixo_contrario
 		move_fantasma_baixo($a2, $a1,1)
 exit_laranja:
 	lw $t4, direcao_flaranja
@@ -617,9 +639,10 @@ loop_verificar_se_travessia_azul:
  	beq	$t1, 16, resetar_atravessia_azul
  	beqz	$t6,loop_verificar_se_travessia_azul
 resetar_atravessia_azul:
-	sw	$zero, array_travessia($t2)
-	addi	$t2, $t2, 4
-	bne	$t2, 16, loop_verificar_se_travessia_azul
+	#sw	$zero, array_travessia($t2)
+	#addi	$t2, $t2, 4
+	add	$t1, $zero, $zero
+	j	loop_verificar_se_travessia_azul
 mover_azul:
 	div	$t1,$t1,4
 	addi	$t1, $t1, 1
