@@ -363,7 +363,7 @@ reinicia_fase2:
 	sw	$v0,direcao_pacman_prox
 	sw	$v0, 0xFFFF0004
 	
-	#jal	transicao_estagio
+	jal	transicao_estagio
 	jal	pintar_tela
 	jal 	escreve_titulo
 	jal	escreve_fase2
@@ -4606,6 +4606,9 @@ venceu:
 	#	QUANDO O JOGADOR morre 
 	#################################################
 morreu:
+	#jal	pintar_tela
+	jal	transicao_estagio
+	jal	aziz_passa_nos
 	jal desenha_vidas
 	j	exit
 	###########################################
