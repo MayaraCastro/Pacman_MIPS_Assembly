@@ -229,6 +229,13 @@ exit_morte:
 n_morreu:			
 .end_macro
 
+.macro zera_arrazy_traversia()
+	sw	$zero, array_traversia +0
+	sw	$zero, array_traversia + 4
+	sw	$zero, array_traversia +8
+	sw	$zero, array_traversia +12
+	
+.end_macro
 .kdata
 pontuacao:		.word 0
 bitmap_size:		.word 65536 # 256*256
@@ -282,7 +289,7 @@ main:
 	
 	li	$s7, 000
 	sw	$s7, pontuacao
-	j venceu
+	#j venceu
 	jal	desenha_vidas
 	j	 fase1
 	
@@ -321,7 +328,7 @@ fase1_loop:
 	#jal	movimenta_fantasma_vermelho
 	#jal	movimenta_fantasma_laranja
 	#jal	movimenta_fantasma_azul
-	#jal	movimenta_fantasma_rosa
+	jal	movimenta_fantasma_rosa
 	
 	la	$v0, pontos_mapa1
 	lw	$v1, tam_pontos_mapa1
@@ -432,11 +439,11 @@ exit_laranja:
 	###########################################
 movimenta_fantasma_rosa:
 	move	$t7, $ra
-    
+    	zera_arrazy_traversia()
 	lw	$t5, fantasma_rosa  
 	lw	$a2, direcao_frosa
 	addi	$t5, $t5, -20 #pra por na posicao certa da verificacao do caminho
-	addi	$t5, $t5, -1024
+	addi	$t5, $t5, -2048
 	jal	verifica_traversia
 	beq	$a1, 0, anda_rosa # se não existe a traversia continua na mesma direcao
     
@@ -511,8 +518,8 @@ verifica_traversia:
 	move	$t8, $ra
 verifica_traversia_direita:
     
-	addi	$t3, $t5,52
-	addi	$t3, $t3,1024
+	addi	$t3, $t5,60
+	addi	$t3, $t3,2048
 	move	$t6, $t3
 	addi	$t6, $t6, 13312
 	jal	verifica_laterais
@@ -526,7 +533,8 @@ verifica_traversia_esquerda:
 	addi	$t9, $t9, 4
 	
     	move	$t3, $t5
-    	addi	$t3, $t3,1024
+    	addi	$t3, $t3,-4
+    	addi	$t3, $t3,2048
 	move	$t6, $t3
 	addi	$t6, $t6, 13312
 	jal 	verifica_laterais
@@ -543,7 +551,7 @@ verifica_traversia_cima:
 	move	$t6, $t3
 	addi	$t6, $t6, 52
 	jal	verifica_topos
-	beq	$a3, 1, verifica_traversia_cima
+	beq	$a3, 1, verifica_traversia_baixo
     
 	li	$t2, 1 #quando é possível ir para a cima
 	sw	$t2,array_traversia($t9)
@@ -4277,7 +4285,9 @@ aziz_passa_nos:
 	#	QUANDO O JOGADOR GANHA O JOGO
 	#################################################
 venceu:
-	jal aziz_passa_nos
+	jal	pintar_tela
+	jal	aziz_passa_nos
+
 	j	exit
 	
 	##################################################
