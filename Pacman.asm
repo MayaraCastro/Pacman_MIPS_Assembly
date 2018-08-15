@@ -1,5 +1,6 @@
 ##################################
-##Código Feito por Mayara Castro##
+##Código Feito por Mayara Castro
+##	Raissa Camelo
 ##################################
 
 #Unit Width in Pixels: 2
